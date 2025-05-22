@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-interface RecensioneRepository extends CrudRepository<Recensione, Long> {
+public interface RecensioneRepository extends CrudRepository<Recensione, Long> {
     // Trova tutte le recensioni di un libro specifico
     public List<Recensione> findByLibro(Books libro);
 

@@ -22,16 +22,26 @@ public class Books {
     private LocalDateTime releaseDate;
     @Lob
     private byte[] pdf;
-    private String urlImage;
+    @Lob
+    private byte[] imageData;
+    private String imageType; // es. "image/jpeg"
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recensione> recensioni;
 
-    public String getUrlImage() {
-        return urlImage;
+    public byte[] getImageData() {
+        return imageData;
     }
 
-    public void setUrlImage(String urlImage) {
-        this.urlImage = urlImage;
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
+
+    public String getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
     }
 
     public List<Recensione> getRecensioni() {

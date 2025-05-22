@@ -5,6 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-interface CredentialsRepository extends CrudRepository<Credentials, Long> {
+public interface CredentialsRepository extends CrudRepository<Credentials, Long> {
     public Optional<Credentials> findByUsername(String username);
 }

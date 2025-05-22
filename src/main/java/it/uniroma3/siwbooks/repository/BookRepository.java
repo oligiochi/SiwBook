@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-interface BookRepository extends CrudRepository<Books, Long> {
+public interface BookRepository extends CrudRepository<Books, Long> {
     @Query("SELECT b FROM Books b WHERE b.author.id = :authorId OR :authorId IN (SELECT a.id FROM b.coautori a)")
     public List<Books> findByAuthorOrCoauthor(@Param("authorId") Long authorId);
     public List<Books> findByTitle(String title);
