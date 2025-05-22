@@ -23,6 +23,8 @@ public class Books {
     @Lob
     private byte[] pdf;
     private String urlImage;
+    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recensione> recensioni;
 
     public String getUrlImage() {
         return urlImage;
@@ -31,9 +33,6 @@ public class Books {
     public void setUrlImage(String urlImage) {
         this.urlImage = urlImage;
     }
-
-    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Recensione> recensioni;
 
     public List<Recensione> getRecensioni() {
         return recensioni;
