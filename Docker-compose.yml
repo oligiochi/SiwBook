@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: SiwBook_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: Books
+    volumes:
+      - ./dati-DB/postgresVagrant:/var/lib/postgresql/data   # percorso personalizzato sul sistema host
+    networks:
+      - docker-network-siwBook
+    ports:
+      - "5432:5432"
+
+networks:
+  docker-network-siwBook:
+    driver: bridge
