@@ -1,0 +1,42 @@
+<section class="vh-100" style="background-color: #fff;">
+  <div class="login-card">
+    <h4 class="subtitle">LOGIN</h4>
+    <div class="title-section">
+      <h1>SIW BOOK</h1>
+      <p class="subtitle">Online Library</p>
+    </div>
+
+    <button (click)="oauthLogin('google')" class="btn google">
+      <fa-icon [icon]="['fab','google']"></fa-icon>
+      Continue with Google
+    </button>
+    <button (click)="oauthLogin('github')" class="btn github" >
+      <fa-icon [icon]="['fab','github']"></fa-icon>
+      Continue with GitHub
+    </button>
+    <button class="btn facebook">
+      <fa-icon [icon]="['fab','facebook']"></fa-icon>
+      Continue with Facebook
+    </button>
+
+    <div class="divider">or</div>
+
+    <input type="text" placeholder="Username" class="input" />
+
+    <div class="password-wrapper">
+      <input
+        [type]="showPassword ? 'text' : 'password'"
+        placeholder="Password"
+        class="password-input"
+        [(ngModel)]="password" />
+
+      <fa-icon
+        [icon]="showPassword ? faEye : faEyeSlash"
+        class="eye-icon"
+        (click)="togglePassword()">
+      </fa-icon>
+    </div>
+
+    <button class="btn login">Log in</button>
+  </div>
+</section>
