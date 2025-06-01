@@ -1,80 +1,73 @@
 package it.uniroma3.siwbooks.authentication;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import static it.uniroma3.siwbooks.models.Credentials.ADMIN_ROLE;
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // 1) CORS abilitato e CSRF disabilitato (o gestito via header)
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                )
 
-                // 2) Permetti l’accesso pubblico a: login REST, OAuth callback, static resources
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/login",               // login REST
-                                "/login",                   // pagina login se vogliamo usarla
-                                "/oauth2/**",               // callback OAuth
-                                "/assets/**", "/favicon.ico"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
+    @Autowired
+    private DataSource dataSource;
 
-                // 3) Endpoint di login REST
-                .formLogin(form -> form
-                        .loginProcessingUrl("/api/login")       // Angular POST → qui
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .successHandler((req, res, auth) -> {
-                            // ritorna 200 OK senza redirect
-                            res.setStatus(HttpServletResponse.SC_OK);
-                        })
-                        .failureHandler((req, res, ex) -> {
-                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                        })
-                        .permitAll()
-                )
-
-                // 4) OAuth2 per “Continue with Google/GitHub…”
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(a -> a.baseUri("/oauth2/authorization"))
-                        .redirectionEndpoint(r -> r.baseUri("/oauth2/callback/*"))
-                        .successHandler((req, res, auth) -> {
-                            // dopo il login OAuth, ridirigi al front
-                            res.sendRedirect("http://localhost:4200");
-                        })
-                );
-
-        return http.build();
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication()
+                .dataSource(dataSource)
+                .authoritiesByUsernameQuery("SELECT username, role from credentials WHERE username=?")
+                .usersByUsernameQuery("SELECT username, password, 1 as enabled FROM credentials WHERE username=?");
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
-        src.registerCorsConfiguration("/**", config);
-        return src;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
+        https
+                .csrf(csrf -> csrf.disable()).cors(cors->cors.disable())
+                .authorizeHttpRequests(requests -> requests
+                        //AUTORIZAZIONI GLOBALI
+                        .requestMatchers(HttpMethod.GET,"/book/**","/author/**","/index", "/register", "/css/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/book/**").permitAll()
+                        //SOLO A I NON AUTENTICATI
+                        .requestMatchers(HttpMethod.POST,"/register","/login").anonymous()
+                        //SOLO A I ADMIN
+                        .requestMatchers(HttpMethod.GET, "/admin/**").hasAnyAuthority(ADMIN_ROLE)
+                        .requestMatchers(HttpMethod.POST, "/admin/**").hasAnyAuthority(ADMIN_ROLE)
+                        //LOGIN METODS
+                        .anyRequest().authenticated()).formLogin(login -> login
+                        .loginPage("/login")
+                        .permitAll()
+                        .defaultSuccessUrl("/success", true)
+                        .failureUrl("/login?error=true"))
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/success", true)
+                        .userInfoEndpoint(userInfo->userInfo
+                                .userService() //da aggiungere
+                        )
+                )
+                .logout(logout->logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .clearAuthentication(true).permitAll());
+        return https.build();
     }
 }

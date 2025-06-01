@@ -18,6 +18,8 @@ public class Books {
     private Autore author;
     @ManyToMany
     private List<Autore> coautori;
+    @ManyToMany
+    private List<Genere> generi;
     @NotNull
     private LocalDateTime releaseDate;
     @Lob
@@ -27,6 +29,14 @@ public class Books {
     private String imageType; // es. "image/jpeg"
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recensione> recensioni;
+
+    public List<Genere> getGeneri() {
+        return generi;
+    }
+
+    public void setGeneri(List<Genere> generi) {
+        this.generi = generi;
+    }
 
     public byte[] getImageData() {
         return imageData;

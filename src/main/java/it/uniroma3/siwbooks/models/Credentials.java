@@ -1,11 +1,7 @@
 package it.uniroma3.siwbooks.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Credentials {
@@ -16,11 +12,22 @@ public class Credentials {
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+	@Column(nullable = false, unique = true)
 	private String username;
+	@NotNull
 	private String password;
+	@NotNull
 	private String role;
+	@NotNull
+	private boolean oauthUser = false;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@Column
+	private String oauthProvider;   // "google", "github", "facebook", ...
+
+	@Column
+	private String oauthId;
+
+	@OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private Utente user;
 	
 	public String getUsername() {
@@ -63,4 +70,27 @@ public class Credentials {
 		this.role = role;
 	}
 
+	public boolean isOauthUser() {
+		return oauthUser;
+	}
+
+	public void setOauthUser(boolean oauthUser) {
+		this.oauthUser = oauthUser;
+	}
+
+	public String getOauthProvider() {
+		return oauthProvider;
+	}
+
+	public void setOauthProvider(String oauthProvider) {
+		this.oauthProvider = oauthProvider;
+	}
+
+	public String getOauthId() {
+		return oauthId;
+	}
+
+	public void setOauthId(String oauthId) {
+		this.oauthId = oauthId;
+	}
 }

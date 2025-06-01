@@ -1,0 +1,61 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.navbar-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-section.center {
+  justify-content: center;
+}
+
+.navbar-section.left,
+.navbar-section.right {
+  justify-content: flex-start;
+}
+
+.navbar-section.right {
+  justify-content: flex-end;
+}
+
+.logo-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  visibility: hidden; /* nascosto ma mantiene spazio */
+}
+
+.site-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.profile-button img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+fa-icon {
+  font-size: 24px;
+  color: #555;
+}

@@ -1,16 +1,35 @@
 import {Component, OnInit} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {RouterOutlet, RouterLink, RouterLinkActive} from '@angular/router';
 import {NgForOf, NgIf} from "@angular/common";
-//import {HomeComponent} from "./home/home.component";
-//import { AuthService } from "./services/auth.service";
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import { AuthService } from "./service/auth.service";
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NgForOf, NgIf],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    NgForOf,
+    NgIf,
+    NgOptimizedImage,
+    FaIconComponent
+  ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'] // <- CORRETTO
 })
+
 export class AppComponent {
+  isLoggedIn = false;
   title = 'SiwBook';
+  profileImageUrl: string | null = 'assets/profile.jpg';
+  faUser = faUser;
+  menuOpen = false;
+
+
+
+
 }
