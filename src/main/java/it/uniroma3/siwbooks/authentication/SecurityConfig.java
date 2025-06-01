@@ -1,9 +1,11 @@
 package it.uniroma3.siwbooks.authentication;
 
+import it.uniroma3.siwbooks.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +20,10 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    @Lazy
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
     private DataSource dataSource;
@@ -58,7 +64,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .defaultSuccessUrl("/success", true)
                         .userInfoEndpoint(userInfo->userInfo
-                                .userService() //da aggiungere
+                                .userService(customOAuth2UserService) //da aggiungere
                         )
                 )
                 .logout(logout->logout

@@ -1,0 +1,167 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: #f1f1f1;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+
+.login-card {
+    width: 320px;
+    padding: 30px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.title-section {
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    color: #777;
+}
+
+.divider {
+    position: relative;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #888;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    position: absolute;
+    width: 40%;
+    height: 1px;
+    background: #ccc;
+}
+
+.divider::before { left: 0; }
+.divider::after  { right: 0; }
+
+.input {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #1d3557;
+    box-shadow: 0 0 0 2px rgba(29, 53, 87, 0.2);
+}
+
+.password-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper:focus-within {
+    border-color: #1d3557;
+    box-shadow: 0 0 0 2px rgba(29, 53, 87, 0.2);
+}
+
+.password-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 10px;
+}
+
+.eye-icon {
+    margin-left: 0.1rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.eye-icon:hover {
+    color: #333;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.3s ease;
+}
+
+.btn .mdi {
+    font-size: 20px;
+}
+
+.btn.google {
+    background-color: #fff;
+    color: #444;
+    border: 1px solid #ccc;
+}
+
+.btn.google:hover {
+    background: #f7f7f7;
+}
+
+.btn.github {
+    background-color: #24292e;
+}
+
+.btn.github:hover {
+    background: #1b1f23;
+}
+
+.btn.facebook {
+    background-color: #3b5998;
+}
+
+.btn.facebook:hover {
+    background: #334f88;
+}
+
+.btn.oauth {
+    background-color: #1d3557;
+}
+
+.btn.oauth:hover {
+    background: #16314a;
+}
+
+.btn.login {
+    background-color: #1d3557;
+}
+
+.btn.login:hover {
+    background: #16314a;
+}

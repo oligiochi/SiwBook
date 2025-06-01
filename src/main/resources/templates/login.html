@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login SIW Book</title>
+
+    <!-- FontAwesome (per le icone) -->
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            integrity="sha512-p8fEyhN5uFgel1nI5E1z4U9Q0KjGqDxIuT4eJ2YfR6wHdOgOXjvogM9nwXTOxDg8Zq+zQWN4Q/OH0hU8rGRlYA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+    />
+
+    <!-- Inserisci qui il tuo file CSS -->
+    <link rel="stylesheet" th:href="@{/css/login.css}" />
+</head>
+<body>
+<section class="vh-100" style="background-color: #fff;">
+    <div class="login-card">
+        <h4 class="subtitle">LOGIN</h4>
+        <div class="title-section">
+            <h1>SIW BOOK</h1>
+            <p class="subtitle">Online Library</p>
+        </div>
+
+        <!-- BOTTONI OAUTH2 -->
+        <a th:href="@{/oauth2/authorization/google}" class="btn google">
+            <i class="fab fa-google"></i>
+            Continue with Google
+        </a>
+        <a th:href="@{/oauth2/authorization/github}" class="btn github">
+            <i class="fab fa-github"></i>
+            Continue with GitHub
+        </a>
+        <a th:href="@{/oauth2/authorization/facebook}" class="btn facebook">
+            <i class="fab fa-facebook"></i>
+            Continue with Facebook
+        </a>
+
+        <div class="divider">or</div>
+
+        <!-- FORM LOGIN TRADIZIONALE -->
+        <form th:action="@{/login}" method="post">
+            <!-- campo username -->
+            <input
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    class="input"
+                    th:value="*{username}"
+                    required
+            />
+
+            <!-- campo password con toggle di visibilità -->
+            <div class="password-wrapper">
+                <input
+                        id="pwdField"
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        class="password-input"
+                        required
+                />
+                <i id="togglePwd" class="fas fa-eye eye-icon"></i>
+            </div>
+
+            <button type="submit" class="btn login">Log in</button>
+        </form>
+    </div>
+</section>
+
+<!-- Includi il file JavaScript esterno -->
+<script th:src="@{/js/login.js}"></script>
+</body>
+</html>
