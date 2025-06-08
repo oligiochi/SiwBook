@@ -109,6 +109,7 @@ public class CredentialsService {
         if ("google".equalsIgnoreCase(provider)) {
             // Google: attributo "sub"
             return (String) attributes.get("sub");
+
         }
         if ("github".equalsIgnoreCase(provider)) {
             // GitHub: attributo "id" numerico → converto in String

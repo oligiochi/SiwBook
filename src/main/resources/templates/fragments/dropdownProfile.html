@@ -1,0 +1,23 @@
+<!-- File: dropdown.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Contenuto del fragment -->
+<li th:fragment="user-dropdown" class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="profiloDropdown" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        Profilo
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profiloDropdown">
+        <li>
+            <h6 class="dropdown-header fw-bold">
+                Benvenuto <span th:text="${userDetails.firstName} + ' ' + ${userDetails.lastName}">Mario Rossi</span>
+            </h6>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" th:href="@{/myProfile/changePassword}">Cambia password</a></li>
+        <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+    </ul>
+</li>
+</body>
+</html>

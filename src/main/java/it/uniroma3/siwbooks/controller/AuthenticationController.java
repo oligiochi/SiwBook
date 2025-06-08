@@ -12,7 +12,9 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import java.util.Map;
 @Controller
 class AuthenticationController {
     @Autowired
@@ -40,21 +42,32 @@ class AuthenticationController {
         return "index.html";
     }
     @GetMapping("/success")
-    public String defaultAfterLogin(Model model) {
-        String username = "";
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            username = userDetails.getUsername();
-            // logica per login tradizionale
-        } else if (principal instanceof DefaultOidcUser oidcUser) {
-            String email = oidcUser.getEmail(); // o oidcUser.getAttribute("email")
-            username = oidcUser.getFullName(); // o .getAttribute("name")
-            // logica per login via Google
+    public String defaultAfterLogin(Authentication authentication,Model model) {
+        Credentials credentials;
+
+        if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
+            // --- flusso OAuth2 (Google, GitHub, ecc.) ---
+            String provider = oauthToken.getAuthorizedClientRegistrationId(); // "google" o "github"
+            Map<String,Object> attributes = oauthToken.getPrincipal().getAttributes();
+
+            // find or create user+credentials da OAuth
+            credentials = credentialsService.findOrCreateFromOAuth(attributes, provider);
+
+        } else {
+            // --- flusso form-login tradizionale ---
+            String username = authentication.getName();
+            credentials = credentialsService.getCredentials(username);
+            if (credentials == null) {
+                // (opzionale) gestisci caso utente non presente
+                throw new IllegalStateException("Credenziali non trovate per: " + username);
+            }
         }
-        Credentials credentials = credentialsService.getCredentials(username);
-        if (credentials.getRole().equals(Credentials.ADMIN_ROLE)) {
+
+        // Redirect in base al ruolo
+        if (Credentials.ADMIN_ROLE.equals(credentials.getRole())) {
             return "admin/indexAdmin.html";
         }
+        model.addAttribute("userDetails", credentials);
         return "index.html";
     }
 }
