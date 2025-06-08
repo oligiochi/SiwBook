@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrazione - SIW Book</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{css/registrazionestyle.css}" />
+</head>
+<body>
+<div class="registration-card">
+    <h4 class="subtitle">CREA UN ACCOUNT</h4>
+    <div class="title-section">
+        <h1>SIW BOOK</h1>
+        <p class="subtitle">Online Library</p>
+    </div>
+
+    <form th:action="@{/register}" th:object="${credentials}" method="post" id="registrationForm">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Nome</label>
+                <input type="text" id="name" name="name" required th:field="*{user.name}" />
+                <div class="error-message" id="firstNameError">Inserisci un nome valido</div>
+            </div>
+            <div class="form-group">
+                <label for="surname">Cognome</label>
+                <input type="text" id="surname" name="surname" required th:field="*{user.surname}" />
+                <div class="error-message" id="lastNameError">Inserisci un cognome valido</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="tua.email@esempio.com" required th:field="*{user.email}" />
+            <div class="error-message" id="emailError">Inserisci un indirizzo email valido</div>
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Scegli un username" required th:field="*{username}" />
+            <div class="error-message" id="usernameError">Username deve essere di almeno 5 caratteri</div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" th:field="*{password}" required />
+                <i id="togglePassword" class="fas fa-eye eye-icon"></i>
+            </div>
+            <div class="password-strength">
+                <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <div class="password-hints">
+                <div class="hint" id="lengthHint"><i class="fas fa-circle"></i> Almeno 8 caratteri</div>
+                <div class="hint" id="numberHint"><i class="fas fa-circle"></i> Contiene un numero</div>
+                <div class="hint" id="specialHint"><i class="fas fa-circle"></i> Contiene un carattere speciale</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Conferma Password</label>
+            <div class="password-wrapper">
+                <input id="confirmPassword" type="password" name="confirmPassword" placeholder="Ripeti la password" class="password-input" required/>
+                <i id="toggleConfirmPassword" class="fas fa-eye eye-icon"></i>
+            </div>
+            <div class="error-message" id="confirmPasswordError">Le password non corrispondono</div>
+        </div>
+
+        <div class="terms">
+            <input type="checkbox" id="terms" name="terms" required />
+            <label for="terms">
+                Accetto i <a th:href="@{/terms}">Termini di Servizio</a> e la <a th:href="@{/privacy}">Privacy Policy</a> di SIW Book
+            </label>
+        </div>
+
+        <button type="submit" class="btn register">Registrati</button>
+    </form>
+
+    <div class="footer">
+        <p>Hai già un account? <a th:href="@{/login}">Accedi</a></p>
+    </div>
+</div>
+
+<script th:src="@{js/registrazionescript.js}"></script>
+</body>
+</html>

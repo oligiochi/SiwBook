@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login SIW Book</title>
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" th:href="@{/css/styleLogin.css}">
+</head>
+<body>
+<div class="login-card">
+    <h4 class="subtitle">LOGIN</h4>
+    <div class="title-section">
+        <h1>SIW BOOK</h1>
+        <p class="subtitle">Online Library</p>
+    </div>
+
+    <!-- OAuth2 Buttons -->
+    <a th:href="@{/oauth2/authorization/google}" class="btn google">
+        <i class="fab fa-google"></i>
+        Continue with Google
+    </a>
+    <a th:href="@{/oauth2/authorization/github}" class="btn github">
+        <i class="fab fa-github"></i>
+        Continue with GitHub
+    </a>
+    <a th:href="@{/oauth2/authorization/facebook}" class="btn facebook">
+        <i class="fab fa-facebook"></i>
+        Continue with Facebook
+    </a>
+
+    <div class="divider">or</div>
+
+    <!-- Login Form -->
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="Username" class="input" required />
+
+        <div class="password-wrapper">
+            <input id="pwdField" type="password" name="password" placeholder="Password" class="password-input" required />
+            <i id="togglePwd" class="fas fa-eye-slash eye-icon"></i>
+        </div>
+
+        <button type="submit" class="btn login">Log in</button>
+    </form>
+
+    <div class="footer">
+        <p>Don't have an account? <a th:href="@{/register}">Sign up</a></p>
+    </div>
+</div>
+
+<!-- External JS -->
+<script th:src="@{/js/loginscript.js}"></script>
+</body>
+</html>

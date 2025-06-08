@@ -56,16 +56,10 @@ public class SecurityConfig {
         https
                 .csrf(csrf -> csrf.disable()).cors(cors->cors.disable())
                 .authorizeHttpRequests(requests -> requests
-                        //AUTORIZAZIONI GLOBALI
-                        .requestMatchers(HttpMethod.GET,"/book/**","/author/**","/index", "/register", "/css/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/book/**").permitAll()
-                        //SOLO A I NON AUTENTICATI
-                        .requestMatchers(HttpMethod.POST,"/register","/login").anonymous()
-                        //SOLO A I ADMIN
-                        .requestMatchers(HttpMethod.GET, "/admin/**").hasAnyAuthority(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.POST, "/admin/**").hasAnyAuthority(ADMIN_ROLE)
-                        //LOGIN METODS
-                        .anyRequest().authenticated()).formLogin(login -> login
+                        .requestMatchers("/", "/login", "/register", "/book/**", "/author/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority(ADMIN_ROLE)
+                        .anyRequest().authenticated()
+                ).formLogin(login -> login
                         .loginPage("/login")
                         .permitAll()
                         .defaultSuccessUrl("/success", true)

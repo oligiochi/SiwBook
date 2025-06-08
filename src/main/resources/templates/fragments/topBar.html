@@ -16,8 +16,9 @@
           </ul>
           <ul class="navbar-nav mb-2 mb-lg-0">
             <li class="nav-item" th:if="${userDetails == null}"><a class="nav-link" href="/login">Login</a></li>
-            <li class="nav-item" th:if="${userDetails != null}">
-              <a class="nav-link" href="/myProfile" th:text="${userDetails.username}"></a>
+
+            <li class="nav-item" th:if="${userDetails != null and currentUser != null}"
+                th:insert="~{fragments/dropdownProfile :: user-dropdown(user=${currentUser})}">
             </li>
           </ul>
         </div>

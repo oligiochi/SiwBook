@@ -9,7 +9,7 @@ body {
 
 /* TOP BAR (NAVBAR) */
 .top-bar {
-    background-color: #207a85; /* Colore esatto dello sketch */
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
     padding: 15px 30px;
 }
 .top-bar .navbar-brand {

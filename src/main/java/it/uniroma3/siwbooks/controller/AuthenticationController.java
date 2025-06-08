@@ -24,11 +24,16 @@ class AuthenticationController {
 
     @GetMapping("/login")
     public String login(Model model) {
-        return "login";
+        return "login2";
     }
 
     @GetMapping("/success")
     public String defaultAfterLogin(Authentication authentication,Model model) {
         return "redirect:/";
+    }
+    @GetMapping("/register")
+    public String register(Model model) {
+        model.addAttribute("credentials",new Credentials());
+        return "registrazione";
     }
 }
