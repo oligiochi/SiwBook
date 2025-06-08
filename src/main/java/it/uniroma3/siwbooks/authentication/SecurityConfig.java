@@ -1,6 +1,7 @@
 package it.uniroma3.siwbooks.authentication;
 
 import it.uniroma3.siwbooks.service.CustomOAuth2UserService;
+import it.uniroma3.siwbooks.service.CustomOidcUserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,10 +13,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import static it.uniroma3.siwbooks.models.Credentials.ADMIN_ROLE;
 import javax.sql.DataSource;
+
 
 @Configuration
 @EnableWebSecurity
@@ -24,6 +30,10 @@ public class SecurityConfig {
     @Autowired
     @Lazy
     private CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    @Lazy
+    private CustomOidcUserService customOidcUserService;
 
     @Autowired
     private DataSource dataSource;
@@ -64,7 +74,15 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .defaultSuccessUrl("/success", true)
                         .userInfoEndpoint(userInfo->userInfo
-                                .userService(customOAuth2UserService) //da aggiungere
+                                .userService(new OAuth2UserService<OAuth2UserRequest, OAuth2User>() {
+                                    @Override
+                                    public OAuth2User loadUser(OAuth2UserRequest userRequest) {
+                                        if (userRequest instanceof OidcUserRequest) {
+                                            return customOidcUserService.loadUser((OidcUserRequest) userRequest);
+                                        }
+                                        return customOAuth2UserService.loadUser(userRequest);
+                                    }
+                                })
                         )
                 )
                 .logout(logout->logout

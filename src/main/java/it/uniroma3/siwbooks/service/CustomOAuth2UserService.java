@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Map;
@@ -16,25 +18,31 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private CredentialsService credentialsService;
+    private OAuthUserService oauthUserService;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest request) {
-        OAuth2User oauth2User = super.loadUser(request);
-        Map<String,Object> attributes = oauth2User.getAttributes();
-        String provider = request.getClientRegistration().getRegistrationId();
+    @Transactional
+    public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
+        try {
+            OAuth2User oauth2User = super.loadUser(request);
+            Map<String, Object> attr = oauth2User.getAttributes();
+            String provider = request.getClientRegistration().getRegistrationId();
 
-        Credentials credentials = credentialsService.findOrCreateFromOAuth(attributes, provider);
+            Credentials cred = oauthUserService.findOrCreateFromOAuth(attr, provider);
+            if (cred == null || cred.getUser() == null || cred.getUser().getId() == null) {
+                throw new OAuth2AuthenticationException("Failed to create or retrieve user credentials");
+            }
 
-        SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority("ROLE_" + credentials.getRole());
+            SimpleGrantedAuthority auth = new SimpleGrantedAuthority("ROLE_" + cred.getRole());
 
-        return new AuthenticatedUser(
-                credentials.getUser().getId(),
-                credentials.getUsername(),
-                Collections.singleton(authority),
-                attributes
-        );
+            return new AuthenticatedUser(
+                    cred.getUser().getId(),
+                    cred.getUsername(),
+                    Collections.singleton(auth),
+                    attr
+            );
+        } catch (Exception e) {
+            throw new OAuth2AuthenticationException("Authentication failed: "+String.valueOf(e));
+        }
     }
 }
-

@@ -56,13 +56,12 @@ public class Utente {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Utente utente = (Utente) o;
-        return Objects.equals(name, utente.name) && Objects.equals(surname, utente.surname);
+        if (!(o instanceof Utente utente)) return false;
+        return Objects.equals(name, utente.name) && Objects.equals(surname, utente.surname) && Objects.equals(email, utente.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, surname);
+        return Objects.hash(name, surname, email);
     }
 }

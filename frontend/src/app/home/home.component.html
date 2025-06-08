@@ -1,0 +1,24 @@
+<div class="search-bar">
+  <input type="text" placeholder="Search for books, authors, or topics" />
+</div>
+
+<section class="recommended">
+  <h2>Recommended for You</h2>
+  <div class="book-list">
+    <div class="book-card" *ngFor="let book of recommendedBooks">
+      <img ngSrc="book.image" alt="Book cover" />
+      <h3>{{ book.title }}</h3>
+      <p>{{ book.subtitle }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="categories">
+  <h2>Popular Categories</h2>
+  <div class="category-list">
+    <div class="category-card" *ngFor="let category of categories">
+      <img ngSrc="category.image" alt="Category" />
+      <p>{{ category.name }}</p>
+    </div>
+  </div>
+</section>
