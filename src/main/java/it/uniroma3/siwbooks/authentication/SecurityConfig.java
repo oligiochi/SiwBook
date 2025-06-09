@@ -63,7 +63,11 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
                         .defaultSuccessUrl("/success", true)
-                        .failureUrl("/login?error=true"))
+                        .failureHandler((request, response, exception) -> {
+                            System.out.println("Login fallito: " + exception.getMessage());
+                            exception.printStackTrace();
+                            response.sendRedirect("/login?error=true");
+                        }))
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .defaultSuccessUrl("/success", true)
@@ -88,4 +92,5 @@ public class SecurityConfig {
                         .clearAuthentication(true).permitAll());
         return https.build();
     }
+
 }

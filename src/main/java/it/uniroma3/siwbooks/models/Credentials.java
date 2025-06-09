@@ -1,6 +1,7 @@
 package it.uniroma3.siwbooks.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
