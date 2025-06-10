@@ -69,7 +69,7 @@
 }
 
 .tags-container {
-    display: flex;
+    display: contents;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 15px;
@@ -85,6 +85,8 @@
     font-size: 0.95rem;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
+    line-height: normal;
+    vertical-align: baseline;
 }
 
 .tag:hover {

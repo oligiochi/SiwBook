@@ -19,5 +19,26 @@ public class GenereService {
                 .map(Genere::getLibri)
                 .orElse(Collections.emptyList());
     }
+    public Genere findById(Long id) {
+        return genereRepository.findById(id).orElse(null);
+    }
+    public Genere findByGenere(String nomeGenere) {
+        return genereRepository.findByGenere(nomeGenere).orElse(null);
+    }
+
+    public Genere save(Genere genere) {
+        return genereRepository.save(genere);
+    }
+    public void delete(Genere genere) {
+        genereRepository.delete(genere);
+    }
+
+    public List<Genere> findAll() {
+        return (List<Genere>) genereRepository.findAll();
+    }
+
+    public int countLibriByGenere(Long genereId) {
+        return genereRepository.countLibriByGenereId(genereId);
+    }
 }
 

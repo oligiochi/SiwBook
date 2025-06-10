@@ -56,7 +56,7 @@ public class SecurityConfig {
         https
                 .csrf(csrf -> csrf.disable()).cors(cors->cors.disable())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/login", "/register", "/book/**", "/author/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/books/**", "/author/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority(ADMIN_ROLE)
                         .anyRequest().authenticated()
                 ).formLogin(login -> login

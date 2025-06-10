@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +29,11 @@ public interface BookRepository extends CrudRepository<Books, Long> {
 
     // Ricerca per anno di pubblicazione (convertito da LocalDateTime)
     @Query("SELECT b FROM Books b WHERE YEAR(b.releaseDate) = :year")
-    List<Books> findByPublishedYear(@Param("year") Integer year);
+    List<Books> findByPublishedDateTime(@Param("year") LocalDateTime Data);
 
     // Ricerca per range di anni (convertito da LocalDateTime)
-    @Query("SELECT b FROM Books b WHERE YEAR(b.releaseDate) BETWEEN :startYear AND :endYear")
-    List<Books> findByPublishedYearBetween(@Param("startYear") Integer startYear,
-                                          @Param("endYear") Integer endYear);
+    @Query("SELECT b FROM Books b WHERE b.releaseDate BETWEEN :startDateTime AND :endDateTime")
+    List<Books> findByReleaseDateTimeBetween(@Param("startDateTime") LocalDateTime start, @Param("endDateTime")   LocalDateTime end);
 
     // Ricerca per autore
     List<Books> findByAuthor(Autore author);
@@ -47,10 +48,6 @@ public interface BookRepository extends CrudRepository<Books, Long> {
     // Libri più recenti
     @Query("SELECT b FROM Books b ORDER BY b.releaseDate DESC")
     List<Books> findRecentBooks();
-
-    // Conta libri per genere
-    @Query("SELECT b.generi, COUNT(b) FROM Books b GROUP BY b.generi")
-    List<Object[]> countBooksByGenre();
 
     // Conta libri per anno
     @Query("SELECT YEAR(b.releaseDate), COUNT(b) FROM Books b GROUP BY YEAR(b.releaseDate) ORDER BY YEAR(b.releaseDate) DESC")
