@@ -38,7 +38,7 @@ public class GenereService {
     }
 
     public int countLibriByGenere(Long genereId) {
-        return genereRepository.countLibriByGenereId(genereId);
+        return genereRepository.findById(genereId).get().getLibri().size();
     }
 }
 

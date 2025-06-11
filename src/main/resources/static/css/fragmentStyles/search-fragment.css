@@ -23,7 +23,7 @@
 }
 
 .search-input:focus {
-    border-color: #2575fc; /* primary color */
+    border-color: #2575fc;
     box-shadow: 0 0 0 4px rgba(37, 117, 252, 0.2);
 }
 
@@ -34,7 +34,7 @@
     height: 45px;
     width: 45px;
     border-radius: 50%;
-    background: linear-gradient(90deg, #2575fc, #6a11cb); /* secondary gradient */
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
     border: none;
     color: #fff;
     display: flex;
@@ -54,7 +54,7 @@
     padding-bottom: 15px;
     margin-bottom: 20px;
     font-weight: 600;
-    color: #2c3e50; /* dark color */
+    color: #2c3e50;
 }
 
 .section-title:after {
@@ -68,14 +68,28 @@
     border-radius: 2px;
 }
 
-.tags-container {
-    display: contents;
+/* Container per i radio-styled buttons */
+.btn-group[role="group"] {
+    display: inline-flex;
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 15px;
 }
 
-.tag {
+.btn-group .btn {
+    flex: 0 0 auto;  /* no flex-grow, no flex-basis stretto */
+}
+
+/* Nascondi i radio veri */
+.btn-check {
+    position: absolute;
+    clip: rect(0,0,0,0);
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Stile di default dei label (bottoni non selezionati) */
+.btn-group .btn {
     display: inline-flex;
     align-items: center;
     background: #eef5ff;
@@ -86,15 +100,22 @@
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
     line-height: normal;
-    vertical-align: baseline;
 }
 
-.tag:hover {
+/* Icone/badge interne ai label */
+.btn-group .btn .badge {
+    background-color: #adb5bd; /* grigio chiaro */
+    margin-left: 8px;
+}
+
+/* Hover sui label */
+.btn-group .btn:hover {
     background: #dbe9ff;
     transform: translateY(-2px);
 }
 
-.tag.active {
+/* Stato selezionato (radio checked) */
+.btn-check:checked + .btn {
     background: linear-gradient(90deg, #2575fc, #6a11cb);
     color: #fff;
     border-color: #2575fc;

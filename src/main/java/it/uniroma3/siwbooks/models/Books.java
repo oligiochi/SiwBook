@@ -1,11 +1,11 @@
 package it.uniroma3.siwbooks.models;
 
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
 @Entity
 public class Books {
     @Id
@@ -14,18 +14,17 @@ public class Books {
     @NotNull
     private String title;
     @NotNull
-    @ManyToOne
-    private Autore author;
     @ManyToMany
-    private List<Autore> coautori;
+    private List<Autore> author;
     @ManyToMany
     private List<Genere> generi;
     @NotNull
     private LocalDateTime releaseDate;
     @Lob
     private byte[] pdf;
-    @Lob
-    private byte[] imageData;
+    @OneToMany
+    private List<Image> images;
+
     private String imageType; // es. "image/jpeg"
     @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Recensione> recensioni;
@@ -36,14 +35,6 @@ public class Books {
 
     public void setGeneri(List<Genere> generi) {
         this.generi = generi;
-    }
-
-    public byte[] getImageData() {
-        return imageData;
-    }
-
-    public void setImageData(byte[] imageData) {
-        this.imageData = imageData;
     }
 
     public String getImageType() {
@@ -62,15 +53,6 @@ public class Books {
         this.recensioni = recensioni;
     }
 
-
-    public List<Autore> getCoautori() {
-        return coautori;
-    }
-
-    public void setCoautori(List<Autore> coautori) {
-        this.coautori = coautori;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -79,11 +61,11 @@ public class Books {
         this.title = title;
     }
 
-    public Autore getAuthor() {
+    public List<Autore> getAuthor() {
         return author;
     }
 
-    public void setAuthor(Autore author) {
+    public void setAuthor(List<Autore> author) {
         this.author = author;
     }
 
@@ -109,6 +91,14 @@ public class Books {
 
     public void setPdf(byte[] pdf) {
         this.pdf = pdf;
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     @Override

@@ -18,7 +18,7 @@ public class Autore {
     @NotNull
     private String cognome;
 
-    @OneToMany(mappedBy = "author")
+    @ManyToMany(mappedBy = "author")
     private List<Books>Libri;
 
     @NotNull

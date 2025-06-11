@@ -46,10 +46,7 @@ class LibriController {
         // ... la tua logica esistente
 
         // aggiungi la data di oggi al model
-        model.addAttribute("today", LocalDate.now());
         model.addAttribute("genere", categoriesGenerator(genreID));
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
         model.addAttribute("sortBy", sortBy);
         return "books";
     }
@@ -61,7 +58,6 @@ class LibriController {
             Map<String,Object> dto = new HashMap<>();
             dto.put("g",   g);                      // il nome del genere
             dto.put("count",    genereService.countLibriByGenere(g.getId()));  // quanti libri
-            dto.put("selected", g.equals(gen));        // se è il filtro corrente
             categories.add(dto);
         }
         return categories;

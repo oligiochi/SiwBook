@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import java.util.List;
 
 public interface BookRepository2 extends CrudRepository<Books, Long> {
-    @Query("SELECT b FROM Books b WHERE b.author.id = :authorId OR :authorId IN (SELECT a.id FROM b.coautori a)")
+    @Query("SELECT b FROM Books b WHERE :authorId IN (SELECT a.id FROM b.author a)")
     public List<Books> findByAuthorOrCoauthor(@Param("authorId") Long authorId);
     public List<Books> findByTitle(String title);
     public List<Books> findByAuthor(Autore author);
