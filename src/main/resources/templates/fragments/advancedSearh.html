@@ -28,7 +28,7 @@
                        name="genre"
                        th:id="${'genre-' + cat.g.id}"
                        th:value="${cat.g.id}"
-                       th:checked="${param.genre}"
+                       th:checked="${cat.selected}"
                        autocomplete="off"
                 />
                 <label class="btn btn-outline-primary"

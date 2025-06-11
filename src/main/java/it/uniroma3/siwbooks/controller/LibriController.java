@@ -57,6 +57,7 @@ class LibriController {
         for (Genere g : allGenres) {
             Map<String,Object> dto = new HashMap<>();
             dto.put("g",   g);                      // il nome del genere
+            dto.put("selected", g.equals(gen));
             dto.put("count",    genereService.countLibriByGenere(g.getId()));  // quanti libri
             categories.add(dto);
         }
