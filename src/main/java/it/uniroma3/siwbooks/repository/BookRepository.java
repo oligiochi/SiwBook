@@ -16,12 +16,18 @@ import java.util.Optional;
 public interface BookRepository extends CrudRepository<Books, Long> {
 
     // Ricerca per termine (titolo, autore, descrizione, genere)
-    @Query("SELECT DISTINCT b FROM Books b " +
-            "LEFT JOIN b.author ca " +
-            "WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(ca.nome) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(ca.cognome) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-            "LOWER(b.generi) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    @Query("""
+        SELECT DISTINCT b 
+        FROM Books b
+        LEFT JOIN b.author ca
+        LEFT JOIN b.generi g
+        WHERE (:searchTerm IS NULL
+               OR LOWER(b.title)   LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(ca.nome)   LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(ca.cognome)LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(g.genere)    LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+              )
+    """)
     List<Books> searchByTerm(@Param("searchTerm") String searchTerm);
 
 

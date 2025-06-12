@@ -23,6 +23,11 @@ VALUES (nextval('books_seq'), 'Il nome della rosa', '1980-10-01'),
        (nextval('books_seq'), 'Il barone rampante', '1957-01-01'),
        (nextval('books_seq'), 'Le città invisibili', '1972-01-01');
 
+INSERT INTO books_generi (libri_id, generi_id)
+VALUES (1, 1), -- Il nome della rosa -> Umberto Eco
+       (51, 51),
+       (251, 51);-- Se questo è un uomo -> Primo Levi
+
 -- Se il join table si chiama books_generi, puoi popolarlo così:
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 1);
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 4);

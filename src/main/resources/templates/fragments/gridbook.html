@@ -73,7 +73,7 @@
                 th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
                 th:classappend="${page.number == i} ? 'active'">
                 <a class="page-link"
-                   th:href="@{'?page=' + ${i}}"
+                   href=""
                    th:data-page="${i}"
                    th:text="${i + 1}">1</a>
             </li>
@@ -81,10 +81,10 @@
             <!-- Successiva: mostrala solo se non sono all’ultima pagina -->
             <li class="page-item" th:if="${!page.last}">
                 <a class="page-link"
-                th:href="@{'?page=' + ${page.number + 1}}"
-                th:data-page="${page.number + 1}"
-                aria-label="Next">
-                 <i class="fa-solid fa-arrow-right"></i>
+                   href=""
+                   th:data-page="${page.number + 1}"
+                   aria-label="Next">
+                   <i class="fa-solid fa-arrow-right"></i>
 
              </a>
          </li>
@@ -92,6 +92,5 @@
  </nav>
 
 </div>
-<script src="/js/pagination.js"></script>
 </body>
 </html>
