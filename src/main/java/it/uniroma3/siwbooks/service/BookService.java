@@ -3,14 +3,21 @@ package it.uniroma3.siwbooks.service;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -38,7 +45,90 @@ public class BookService {
     }
 
     // Ricerca combinata: searchTerm + filtro range date + ordinamento base
-    public List<Books> searchWithFilters(String searchTerm, String startDateStr, String endDateStr, String sortBy) {
+    public List<Books> searchWithFilters(String searchTerm, LocalDateTime startDateStr, LocalDateTime endDateStr, String sortBy) {
+        List<Books> booksTerms = searchByTerm(searchTerm);
+        List<Books> booksYear=new ArrayList<>();
+        if (startDateStr != null && endDateStr == null) {
+            booksYear = findByPublishedYear(startDateStr);
+        }else if (startDateStr != null && endDateStr != null) {
+            booksYear = findByPublishedYearBetween(startDateStr, endDateStr);
+        }
+
         return null;
+    }
+
+    public Page<Books> searchBooks(
+            String searchTerm,
+            Long genreId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Sort sort,
+            Pageable pageable
+    ) {
+        // 1) Recupera tutti i libri o filtra per termine
+        List<Books> all = new ArrayList<>();
+        if (searchTerm != null && !searchTerm.isBlank()) {
+            all = bookRepository.searchByTerm(searchTerm);
+        } else {
+            bookRepository.findAll().forEach(all::add);
+        }
+
+        // 2) Filtra per genere se richiesto
+        if (genreId != null && genreId != -1) {
+            all = all.stream()
+                    .filter(b -> b.getGeneri().stream()
+                            .anyMatch(g -> g.getId().equals(genreId)))
+                    .collect(Collectors.toList());
+        }
+
+        // 3) Filtra per date se presenti
+        if (startDate != null || endDate != null) {
+            all = all.stream()
+                    .filter(b -> {
+                        LocalDate pub = b.getReleaseDate().toLocalDate();
+                        boolean afterStart = (startDate == null) || !pub.isBefore(startDate);
+                        boolean beforeEnd  = (endDate   == null) || !pub.isAfter(endDate);
+                        return afterStart && beforeEnd;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // 4) Applica l'ordinamento in memoria
+        Comparator<Books> cmp = Comparator.comparing(Books::getReleaseDate).reversed();
+        if (sort.isSorted()) {
+            // esempio: supporta un singolo ordine; per più ordini estendi
+            Sort.Order o = sort.iterator().next();
+            String prop = o.getProperty();
+            boolean asc = o.isAscending();
+            switch(prop) {
+                case "publicationDate":
+                case "releaseDate":
+                    cmp = Comparator.comparing(Books::getReleaseDate);
+                    break;
+                case "rating":
+                    cmp = Comparator.comparing(b -> {
+                        return b.getReleaseDate();
+                    });
+                    break;
+                case "title":
+                    cmp = Comparator.comparing(Books::getTitle, String.CASE_INSENSITIVE_ORDER);
+                    break;
+                default:
+                    cmp = Comparator.comparing(Books::getReleaseDate);
+            }
+            if (!asc) cmp = cmp.reversed();
+        }
+        all.sort(cmp);
+
+        // 5) Sotto-lista per paginazione
+        int total = all.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), total);
+        List<Books> content = start <= end
+                ? all.subList(start, end)
+                : List.of();
+
+        // 6) Restituisci la Page
+        return new PageImpl<>(content, pageable, total);
     }
 }

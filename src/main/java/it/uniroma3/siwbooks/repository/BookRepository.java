@@ -47,6 +47,10 @@ public interface BookRepository extends CrudRepository<Books, Long> {
     @Query("SELECT b FROM Books b ORDER BY b.releaseDate DESC")
     List<Books> findRecentBooks();
 
+    // Libri ordine Alfabetico
+    @Query("SELECT b FROM Books b ORDER BY b.title ASC")
+    List<Books> findAllBooksOrderByTitleAsc();
+
     // Conta libri per anno
     @Query("SELECT YEAR(b.releaseDate), COUNT(b) FROM Books b GROUP BY YEAR(b.releaseDate) ORDER BY YEAR(b.releaseDate) DESC")
     List<Object[]> countBooksByYear();
