@@ -60,7 +60,8 @@
             <!-- Precedente: mostralo solo se non sono alla prima pagina -->
             <li class="page-item" th:if="${!page.first}">
                 <a class="page-link"
-                   th:href="@{'?page=' + ${page.number - 1}}"
+                   href=""
+                   th:data-page="${page.number - 1}"
                    aria-label="Previous">
                     <i class="fa-solid fa-arrow-left"></i>
 
@@ -73,21 +74,24 @@
                 th:classappend="${page.number == i} ? 'active'">
                 <a class="page-link"
                    th:href="@{'?page=' + ${i}}"
+                   th:data-page="${i}"
                    th:text="${i + 1}">1</a>
             </li>
 
             <!-- Successiva: mostrala solo se non sono all’ultima pagina -->
             <li class="page-item" th:if="${!page.last}">
                 <a class="page-link"
-                   th:href="@{'?page=' + ${page.number + 1}}"
-                   aria-label="Next">
-                    <i class="fa-solid fa-arrow-right"></i>
+                th:href="@{'?page=' + ${page.number + 1}}"
+                th:data-page="${page.number + 1}"
+                aria-label="Next">
+                 <i class="fa-solid fa-arrow-right"></i>
 
-                </a>
-            </li>
-        </ul>
-    </nav>
+             </a>
+         </li>
+     </ul>
+ </nav>
 
 </div>
+<script src="/js/pagination.js"></script>
 </body>
 </html>

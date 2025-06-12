@@ -55,9 +55,9 @@ class LibriController {
         // 1) costruisci l'oggetto Sort in base a sortBy
         Sort sort = switch(sortBy) {
             case "DATE_ASC"    -> Sort.by("releaseDate").ascending();
-            case "TITLE_ASC"   -> Sort.by("title").ascending();
+            case "TITLE"   -> Sort.by("title").ascending();
             case "TITLE_DESC"  -> Sort.by("title").descending();
-            case "POPULARITY"  -> Sort.by("popularity").descending();  // se vuoi usarlo
+            case "RATING"  -> Sort.by("popularity").descending();  // se vuoi usarlo
             default            -> Sort.by("releaseDate").descending(); // DATE_DESC
         };
 

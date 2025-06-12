@@ -111,7 +111,7 @@ public class BookService {
                     });
                     break;
                 case "title":
-                    cmp = Comparator.comparing(Books::getTitle, String.CASE_INSENSITIVE_ORDER);
+                    cmp = Comparator.comparing(b -> b.getTitle().toLowerCase(), String.CASE_INSENSITIVE_ORDER);
                     break;
                 default:
                     cmp = Comparator.comparing(Books::getReleaseDate);
