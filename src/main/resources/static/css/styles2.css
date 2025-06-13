@@ -76,6 +76,7 @@ main.book-page {
     color: #1a5e66;
     text-decoration: underline;
 }
+
 /* Pagina Autore */
 .author-page {
     max-width: 1000px;
@@ -135,7 +136,6 @@ main.book-page {
     text-decoration: underline;
     color: #1a5e66;
 }
-
 
 /* SEZIONE RECENSIONI */
 .book-reviews {
@@ -258,13 +258,6 @@ main.book-page {
     margin-top: 10vh;
 }
 
-.login-title {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 1.8em;
-    color: #333333;
-}
-
 .login-form label {
     display: block;
     margin-bottom: 8px;
@@ -298,21 +291,6 @@ main.book-page {
     background-color: #3737cc;
 }
 
-.login-footer {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 0.9em;
-    color: #777;
-}
-
-.login-footer a {
-    color: #4a4aff;
-    text-decoration: none;
-}
-
-.login-footer a:hover {
-    text-decoration: underline;
-}
 /*BOOK LIST*/
 .book-cover {
     width: 100%;
@@ -338,7 +316,6 @@ main.book-page {
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     overflow: hidden;
-    text-align: center;
     transition: transform 0.2s ease-in-out;
 }
 
@@ -357,8 +334,6 @@ main.book-page {
     padding: 2rem;
 }
 /*MENU MODIFICA E CANCELLAZIONE COMMENTI*/
-
-
 
 .menu-button-container {
     position: absolute;
@@ -417,4 +392,3 @@ main.book-page {
         padding: 0 10px;
     }
 }
-

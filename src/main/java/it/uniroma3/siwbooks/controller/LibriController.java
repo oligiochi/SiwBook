@@ -69,21 +69,31 @@ public class LibriController {
     }
 
     @GetMapping("/book/{id}")
-    public String getBook(@PathVariable("id") Long id, Model model) {
-        List<Recensione> bookReviews = RecensioneService.getBookReviews(id);
+    public String getBook(
+            @PathVariable("id") Long id,
+            Model model) {
+
+        // 1) prendi tutte le recensioni del libro
+        List<Recensione> allReviews = RecensioneService.getBookReviews(id);
+
+        // 2) utente corrente
         Utente currentUser = userService.getCurrentUser();
-        List<Recensione> userReviews = (currentUser != null)
-                ? bookReviews.stream()
-                .filter(r -> r.getAuthor().equals(currentUser))
-                .collect(Collectors.toList())
-                : Collections.emptyList();
 
-        model.addAttribute("userReview", userReviews);
-        model.addAttribute("bookReviews", bookReviews.stream().filter(review -> !review.getAuthor().equals(currentUser)));// INVIO SOLO QUELLE CHE NON SONO DELL'UTENTE forse migliorabile
+        // 3) split in due liste: recensioni dell'utente e recensioni degli altri
+        Map<Boolean, List<Recensione>> partitioned = allReviews.stream()
+                .collect(Collectors.partitioningBy(r -> currentUser != null && r.getAuthor().equals(currentUser)));
 
-        model.addAttribute("book",bookService.findById(id));
+        List<Recensione> userReviews  = partitioned.get(true);
+        List<Recensione> otherReviews = partitioned.get(false);
+
+        // 4) aggiungi al modello
+        model.addAttribute("book",        bookService.findById(id));
+        model.addAttribute("userReviews",  userReviews);
+        model.addAttribute("bookReviews",  otherReviews);
+
         return "book";
     }
+
 
     @GetMapping("/book/{id}/cover")
     public ResponseEntity<byte[]> getBookCover(@PathVariable Long id) {

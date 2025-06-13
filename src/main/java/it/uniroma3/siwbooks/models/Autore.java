@@ -2,9 +2,11 @@ package it.uniroma3.siwbooks.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,8 +24,15 @@ public class Autore {
     private List<Books>Libri;
 
     @NotNull
+    @PastOrPresent(message = "{dateOfBirth.pastOrPresent}")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate dateOfBirth;
+    private LocalDateTime dateOfBirth;
+
+    @PastOrPresent(message = "{dateOfDeath.pastOrPresent}")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime dateOfDeath;
+    @NotNull
+    private String nationality;
 
     @Override
     public boolean equals(Object o) {
@@ -69,11 +78,27 @@ public class Autore {
         Libri = libri;
     }
 
-    public LocalDate getDateOfBirth() {
+    public LocalDateTime getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(LocalDateTime dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public LocalDateTime getDateOfDeath() {
+        return dateOfDeath;
+    }
+
+    public void setDateOfDeath(LocalDateTime dateOfDeath) {
+        this.dateOfDeath = dateOfDeath;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
     }
 }

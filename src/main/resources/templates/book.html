@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${book.title} + ' – Dettagli'">Dettaglio libro</title>
+    <link rel="stylesheet" href="/css/styles2.css">
     <link rel="stylesheet" href="/css/book.css">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
 <body>
+<div th:insert="~{fragments/topBar :: site-header}"></div>
 <div class="container">
     <div class="book-card">
         <div class="book-header">
@@ -16,8 +19,13 @@
             <div class="book-details">
                 <div>
                     <h1 class="book-title" th:text="${book.title}">Titolo</h1>
-                    <div class="book-author" th:each="a : ${book.author}"
-                         th:text="${a.nome}">Autore</div>
+                    <div class="book-author">
+                        <span th:each="a, iterStat : ${book.author}"
+                              th:text="${a.nome} + ' ' + ${a.cognome} + ${iterStat.last ? '' : ', '}">
+                            Autore
+                        </span>
+                    </div>
+
                     <div class="book-tags">
                             <span class="tag" th:each="g : ${book.generi}"
                                   th:text="${g.genere}">Genere</span>
@@ -27,7 +35,7 @@
                     <div class="meta-item">
                         <span class="meta-label">PUBBLICAZIONE</span>
                         <span class="meta-value"
-                              th:text="${#temporals.format(book.releaseDate, 'yyyy')}">
+                              th:text="${#temporals.format(book.releaseDate, 'yyyy/MM/dd')}">
                                 1980
                             </span>
                     </div>
@@ -37,10 +45,10 @@
                             <!--<div class="stars" th:utext="${bookService.renderStars(book)}">
                                  e.g. ★★★★☆
                             </div>-->
-                            <span class="rating-value"
-                                  th:text="${@bookService.AvgStar(book)}">}">
-                                    4.7
-                                </span>
+                            <span class="book-rating">
+                                <i class="fas fa-star"></i>
+                                <span th:text="${@bookService.AvgStar(book) != -1 ? @bookService.AvgStar(book) : 'N.D.'}">4.5</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -57,9 +65,11 @@
             <h2 class="section-title">
                 <i class="fas fa-comments"></i> Recensioni
             </h2>
-            <div th:insert="fragments/bookReviews :: reviews(book)"></div>
-            <div th:insert="fragments/bookReviews :: reviews(bookReviews)"></div>
-
+            <div th:insert="fragments/bookReviews :: reviews(${userReviews})"></div>
+            <div th:insert="fragments/bookReviews :: reviews(${bookReviews})"></div>
+            <div class="no-reviews" th:if="${#lists.isEmpty(userReviews) and #lists.isEmpty(bookReviews)}">
+                Nessuna recensione per questo libro.
+            </div>
         </div>
     </div>
 </div>

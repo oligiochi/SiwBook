@@ -1,32 +1,32 @@
 <!-- fragments/bookReviews.html -->
-<div th:fragment="reviews(Reviews)">
-    <div class="reviews-container" th:if="${#lists.isEmpty(Reviews) == false}">
-        <div class="review" th:each="r : ${Reviews}">
+<div th:fragment="reviews(reviewsList)">
+    <div class="reviews-container" th:if="${not #lists.isEmpty(reviewsList)}">
+        <div class="review" th:each="r : ${reviewsList}">
             <div class="review-header">
-                <div class="reviewer" th:text="${r.getAuthor().getNome()} + ' ' + ${r.getAuthor().getCognome()}">
-                    Nome recensore
+                <div class="reviewer"
+                     th:text="${r.author.name} + ' ' + ${r.author.surname}">
+                    <!-- Nome recensione -->
                 </div>
+                <!-- Se ti serve la data, usa #temporals e una proprietà r.date -->
                 <!--
                 <div class="review-date"
-                     th:text="${#dates.format(r.date, 'dd MMMM yyyy')}">
-                    15 Gennaio 2024
+                     th:text="${#temporals.format(r.date, 'dd MMMM yyyy')}">
                 </div>
                 -->
             </div>
             <div class="review-rating">
-                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, r.getStelle())}"></i>
-                <i class="fas fa-star empty-stars"
-                   th:each="i : ${#numbers.sequence(r.getStelle()+1, 5)}"></i>
+                <i class="fas"
+                   th:each="i : ${#numbers.sequence(1,5)}"
+                   th:classappend="${i <= r.stelle} ? ' fa-star' : ' fa-star empty-stars'">
+                </i>
             </div>
-            <div class="reviewer" th:text="${r.getTitolo()}">
-                Titolo
+
+            <div class="review-title" th:text="${r.titolo}">
+                Titolo recensione
             </div>
-            <div class="review-content" th:text="${r.getCommento()}">
+            <div class="review-content" th:text="${r.commento}">
                 Testo della recensione...
             </div>
         </div>
-    </div>
-    <div class="no-reviews" th:if="${#lists.isEmpty(Reviews)}">
-        Nessuna recensione per questo libro.
     </div>
 </div>

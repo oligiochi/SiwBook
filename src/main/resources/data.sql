@@ -26,7 +26,8 @@ VALUES (nextval('books_seq'), 'Il nome della rosa', '1980-10-01'),
 INSERT INTO books_generi (libri_id, generi_id)
 VALUES (1, 1), -- Il nome della rosa -> Umberto Eco
        (51, 51),
-       (251, 51);-- Se questo è un uomo -> Primo Levi
+       (251, 51),
+       (51, 151);-- Se questo è un uomo -> Primo Levi
 INSERT INTO utente (id, name,surname,email)
 VALUES
     (nextval('utente_seq'), 'Mario','Rossi','marRos'),
@@ -41,6 +42,21 @@ values
     (5,1,51,nextval('recensione_seq'),'Review Positiva','Commento positivo'),
     (4,51,51,nextval('recensione_seq'),'Review Media','Commento Medio');
 
+INSERT INTO autore (id, nome, cognome, date_of_birth, date_of_death, nationality)
+VALUES (nextval('autore_seq'), 'Umberto', 'Eco', '1932-01-05', '2016-02-19', 'Italiana'),
+       (nextval('autore_seq'), 'Primo', 'Levi', '1919-07-31', '1987-04-11', 'Italiana'),
+       (nextval('autore_seq'), 'Giuseppe', 'Tomasi di Lampedusa', '1896-12-23', '1957-07-23', 'Italiana'),
+       (nextval('autore_seq'), 'Carlo', 'Levi', '1900-11-29', '1975-01-04', 'Italiana'),
+       (nextval('autore_seq'), 'Italo', 'Svevo', '1861-12-19', '1928-09-13', 'Italiana'),
+       (nextval('autore_seq'), 'Alessandro', 'Manzoni', '1785-03-07', '1873-05-22', 'Italiana'),
+       (nextval('autore_seq'), 'Grazia', 'Deledda', '1871-09-28', '1936-08-15', 'Italiana'),
+       (nextval('autore_seq'), 'Luigi', 'Pirandello', '1867-06-28', '1936-12-10', 'Italiana'),
+       (nextval('autore_seq'), 'Italo', 'Calvino', '1923-10-15', '1985-09-19', 'Italiana');
+
+INSERT INTO books_author (author_id, libri_id)
+VALUES (1, 1), -- Il nome della rosa -> Umberto Eco
+       (51, 51),-- Se questo è un uomo -> Primo Levi
+       (301, 51);
 -- Se il join table si chiama books_generi, puoi popolarlo così:
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 1);
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 4);
