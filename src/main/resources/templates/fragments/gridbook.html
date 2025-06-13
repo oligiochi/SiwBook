@@ -42,10 +42,10 @@
                         <h3 class="book-title" th:text="${book.title}">Titolo</h3>
                     </div>
                     <div class="book-meta">
-                        <!--<span class="book-rating">
+                        <span class="book-rating">
                             <i class="fas fa-star"></i>
-                            <span th:text="${book.rating != null ? book.rating : 'N.D.'}">4.5</span>
-                        </span>-->
+                            <span th:text="${book.star != -1 ? book.star : 'N.D.'}">4.5</span>
+                        </span>
                         <span class="book-year" th:text="${#temporals.format(book.releaseDate, 'yyyy')}">2023</span>
                     </div>
                 </div>

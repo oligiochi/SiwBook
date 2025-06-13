@@ -28,13 +28,13 @@
                         <input type="radio"
                                class="btn-check"
                                name="genre"
-                               th:id="${'genre-' + cat.g.id}"
-                               th:value="${cat.g.id}"
+                               th:id="${'genre-' + cat.id}"
+                               th:value="${cat.id}"
                                th:checked="${cat.selected}"
                                autocomplete="off" />
                         <label class="btn btn-outline-primary"
-                               th:for="${'genre-' + cat.g.id}">
-                            <span th:text="${cat.g.genere}">Genere</span>
+                               th:for="${'genre-' + cat.id}">
+                            <span th:text="${cat.genereName}">Genere</span>
                             <span class="badge rounded-pill bg-secondary ms-1"
                                   th:text="${cat.count}">0</span>
                         </label>

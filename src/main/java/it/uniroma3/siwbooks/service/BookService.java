@@ -1,6 +1,7 @@
 package it.uniroma3.siwbooks.service;
 
 import it.uniroma3.siwbooks.models.Books;
+import it.uniroma3.siwbooks.models.Recensione;
 import it.uniroma3.siwbooks.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -106,9 +107,13 @@ public class BookService {
                     cmp = Comparator.comparing(Books::getReleaseDate);
                     break;
                 case "rating":
-                    cmp = Comparator.comparing(b -> {
-                        return b.getReleaseDate();
-                    });
+                    cmp = Comparator.comparingDouble(b ->
+                            b.getRecensioni().stream()
+                                    .mapToInt(Recensione::getStelle)
+                                    .average()
+                                    .orElse(-1)
+                    );
+
                     break;
                 case "title":
                     cmp = Comparator.comparing(b -> b.getTitle().toLowerCase(), String.CASE_INSENSITIVE_ORDER);
@@ -130,5 +135,9 @@ public class BookService {
 
         // 6) Restituisci la Page
         return new PageImpl<>(content, pageable, total);
+    }
+    public Double AvgStar(Books book){
+        List<Recensione> recensioni = book.getRecensioni();
+        return (Double) recensioni.stream().mapToInt(Recensione::getStelle).average().orElse(-1);
     }
 }

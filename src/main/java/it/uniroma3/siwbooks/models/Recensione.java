@@ -3,6 +3,8 @@ package it.uniroma3.siwbooks.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.Objects;
+
 @Entity
 public class Recensione {
 
@@ -10,7 +12,8 @@ public class Recensione {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false,cascade = CascadeType.MERGE)
+    @JoinColumn(name = "book_id", nullable = false)
     private Books libro; // relazione: molti a uno (molte recensioni per un libro)
 
     @Min(0)
@@ -20,7 +23,20 @@ public class Recensione {
     @Size(max = 1000)
     private String commento;
 
+    @ManyToOne
+    @NotNull
+    private Utente author;
+
     // --- Getter e Setter ---
+
+
+    public Utente getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Utente author) {
+        this.author = author;
+    }
 
     public Long getId() {
         return id;
@@ -52,5 +68,16 @@ public class Recensione {
 
     public void setCommento(String commento) {
         this.commento = commento;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Recensione that)) return false;
+        return Objects.equals(libro, that.libro) && Objects.equals(author, that.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(libro, author);
     }
 }

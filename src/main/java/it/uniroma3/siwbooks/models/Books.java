@@ -26,7 +26,7 @@ public class Books {
     private List<Image> images;
 
     private String imageType; // es. "image/jpeg"
-    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "libro", cascade = CascadeType.REMOVE)
     private List<Recensione> recensioni;
 
     public List<Genere> getGeneri() {
