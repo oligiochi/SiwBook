@@ -27,6 +27,19 @@ INSERT INTO books_generi (libri_id, generi_id)
 VALUES (1, 1), -- Il nome della rosa -> Umberto Eco
        (51, 51),
        (251, 51);-- Se questo è un uomo -> Primo Levi
+INSERT INTO utente (id, name,surname,email)
+VALUES
+    (nextval('utente_seq'), 'Mario','Rossi','marRos'),
+    (nextval('utente_seq'), 'Giuseppe','Verdi','giusVerdi'),
+    (nextval('utente_seq'), 'Alfonso','Neri','alfNeri'),
+    (nextval('utente_seq'), 'Utente','Test','utenteTest@mail.com'),
+    (nextval('utente_seq'), 'Admin','Admin','admin@mail.com');
+
+insert into recensione (stelle, author_id, book_id, id, commento,titolo)
+values
+    (5,1,1,nextval('recensione_seq'),'Review Positiva','Commento positivo'),
+    (5,1,51,nextval('recensione_seq'),'Review Positiva','Commento positivo'),
+    (4,51,51,nextval('recensione_seq'),'Review Media','Commento Medio');
 
 -- Se il join table si chiama books_generi, puoi popolarlo così:
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 1);

@@ -1,0 +1,52 @@
+<!-- fragments/bookCarousel.html -->
+<div th:fragment="carousel(book)">
+    <!-- Importa solo per questo fragment -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/fragmentStyles/bookCarousel.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <div th:with="carouselId=${'bookCarousel__' + book.id}"
+         th:attr="id=${carouselId}"
+         class="carousel slide book-carousel-container">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img th:src="@{'/book/' + ${book.id} + '/cover'}"
+                     class="d-block w-100 h-100 carousel-image"
+                     th:alt="'Copertina di ' + ${book.title}"
+                     onerror="this.onerror=null;this.src='/images/book_cover_placeholder2.png';">
+            </div>
+            <div th:if="${book.getImages()} != null and !${book.getImages().isEmpty()}"
+                 th:each="img, idx : ${book.getImages()}"
+                 class="carousel-item">
+                <img th:src="@{'/book/' + ${book.id} + '/images/' + ${idx}}"
+                     class="d-block w-100 h-100 carousel-image"
+                     th:alt="'Immagine ' + (${idx} + 1) + ' di ' + ${book.title}"
+                     onerror="this.onerror=null;this.src='/images/book_cover_placeholder2.png';">
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button"
+                th:attr="data-bs-target='#' + ${carouselId}"
+                data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button"
+                th:attr="data-bs-target='#' + ${carouselId}"
+                data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+
+        <div class="carousel-indicators">
+            <button type="button"
+                    th:attr="data-bs-target='#' + ${carouselId}"
+                    data-bs-slide-to="0"
+                    class="active"
+                    th:aria-label="'Copertina di ' + ${book.title}"></button>
+            <button th:each="img, idx : ${book.getImages()}"
+                    type="button"
+                    th:attr="data-bs-target='#' + ${carouselId}"
+                    th:data-bs-slide-to="${idx + 1}"
+                    th:aria-label="'Immagine ' + (${idx} + 1)"></button>
+        </div>
+    </div>
+</div>

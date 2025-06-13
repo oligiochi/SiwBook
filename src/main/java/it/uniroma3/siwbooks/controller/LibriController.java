@@ -4,31 +4,29 @@ import it.uniroma3.siwbooks.dto.BookInfoDto;
 import it.uniroma3.siwbooks.dto.GenreDto;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.models.Genere;
-import it.uniroma3.siwbooks.service.AutoreService;
-import it.uniroma3.siwbooks.service.BookService;
-import it.uniroma3.siwbooks.service.BookService2;
-import it.uniroma3.siwbooks.service.GenereService;
+import it.uniroma3.siwbooks.models.Recensione;
+import it.uniroma3.siwbooks.models.Utente;
+import it.uniroma3.siwbooks.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/books")
 public class LibriController {
 
     @Autowired
@@ -37,8 +35,12 @@ public class LibriController {
     private BookService bookService;
     @Autowired
     private AutoreService autoreService;
+    @Autowired
+    private RecensioneService RecensioneService;
+    @Autowired
+    private UtenteService userService;
 
-    @GetMapping
+    @GetMapping("/books")
     public String list(
             @RequestParam(required = false) String searchTerm,
             @RequestParam(name = "genre", defaultValue = "-1") Long genreID,
@@ -64,6 +66,35 @@ public class LibriController {
         model.addAttribute("sortBy", sortBy);
 
         return "books";
+    }
+
+    @GetMapping("/book/{id}")
+    public String getBook(@PathVariable("id") Long id, Model model) {
+        List<Recensione> bookReviews = RecensioneService.getBookReviews(id);
+        Utente currentUser = userService.getCurrentUser();
+        List<Recensione> userReviews = (currentUser != null)
+                ? bookReviews.stream()
+                .filter(r -> r.getAuthor().equals(currentUser))
+                .collect(Collectors.toList())
+                : Collections.emptyList();
+
+        model.addAttribute("userReview", userReviews);
+        model.addAttribute("bookReviews", bookReviews.stream().filter(review -> !review.getAuthor().equals(currentUser)));// INVIO SOLO QUELLE CHE NON SONO DELL'UTENTE forse migliorabile
+
+        model.addAttribute("book",bookService.findById(id));
+        return "book";
+    }
+
+    @GetMapping("/book/{id}/cover")
+    public ResponseEntity<byte[]> getBookCover(@PathVariable Long id) {
+        Books book = bookService.findById(id);
+        if (book == null || book.getCoverImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        byte[] data = book.getCoverImage().getData();
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // o rileva dinamicamente
+                .body(data);
     }
 
     private Sort buildSort(String sortBy) {

@@ -15,4 +15,7 @@ public interface RecensioneRepository extends CrudRepository<Recensione, Long> {
 
     // (Opzionale) Verifica se un libro ha almeno una recensione
     public boolean existsByLibro(Books libro);
+
+    List<Recensione> findByLibro_Id(Long bookId);
+
 }

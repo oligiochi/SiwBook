@@ -93,6 +93,10 @@ public class Books {
         this.pdf = pdf;
     }
 
+    public Image getCoverImage(){
+        if(this.images == null || this.images.isEmpty()) return null;
+        return this.images.get(0);
+    }
     public List<Image> getImages() {
         return images;
     }

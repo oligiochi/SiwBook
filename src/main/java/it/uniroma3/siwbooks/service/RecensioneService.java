@@ -5,7 +5,6 @@ import it.uniroma3.siwbooks.models.Recensione;
 import it.uniroma3.siwbooks.repository.RecensioneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,5 +41,9 @@ public class RecensioneService {
 
     public void delete(Recensione recensione) {
         recensioneRepository.delete(recensione);
+    }
+
+    public List<Recensione> getBookReviews(Long bookId) {
+        return recensioneRepository.findByLibro_Id(bookId);
     }
 }

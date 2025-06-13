@@ -1,0 +1,32 @@
+<!-- fragments/bookReviews.html -->
+<div th:fragment="reviews(Reviews)">
+    <div class="reviews-container" th:if="${#lists.isEmpty(Reviews) == false}">
+        <div class="review" th:each="r : ${Reviews}">
+            <div class="review-header">
+                <div class="reviewer" th:text="${r.getAuthor().getNome()} + ' ' + ${r.getAuthor().getCognome()}">
+                    Nome recensore
+                </div>
+                <!--
+                <div class="review-date"
+                     th:text="${#dates.format(r.date, 'dd MMMM yyyy')}">
+                    15 Gennaio 2024
+                </div>
+                -->
+            </div>
+            <div class="review-rating">
+                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, r.getStelle())}"></i>
+                <i class="fas fa-star empty-stars"
+                   th:each="i : ${#numbers.sequence(r.getStelle()+1, 5)}"></i>
+            </div>
+            <div class="reviewer" th:text="${r.getTitolo()}">
+                Titolo
+            </div>
+            <div class="review-content" th:text="${r.getCommento()}">
+                Testo della recensione...
+            </div>
+        </div>
+    </div>
+    <div class="no-reviews" th:if="${#lists.isEmpty(Reviews)}">
+        Nessuna recensione per questo libro.
+    </div>
+</div>

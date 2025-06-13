@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.title} + ' – Dettagli'">Dettaglio libro</title>
+    <link rel="stylesheet" href="/css/book.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="book-card">
+        <div class="book-header">
+            <div class="book-cover" th:replace="fragments/Carousel :: carousel(${book})"></div>
+            <div class="book-details">
+                <div>
+                    <h1 class="book-title" th:text="${book.title}">Titolo</h1>
+                    <div class="book-author" th:each="a : ${book.author}"
+                         th:text="${a.nome}">Autore</div>
+                    <div class="book-tags">
+                            <span class="tag" th:each="g : ${book.generi}"
+                                  th:text="${g.genere}">Genere</span>
+                    </div>
+                </div>
+                <div class="book-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">PUBBLICAZIONE</span>
+                        <span class="meta-value"
+                              th:text="${#temporals.format(book.releaseDate, 'yyyy')}">
+                                1980
+                            </span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">VALUTAZIONE</span>
+                        <div class="rating">
+                            <!--<div class="stars" th:utext="${bookService.renderStars(book)}">
+                                 e.g. ★★★★☆
+                            </div>-->
+                            <span class="rating-value"
+                                  th:text="${@bookService.AvgStar(book)}">}">
+                                    4.7
+                                </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--<div class="book-description">
+            <p th:text="${book.description}">
+                Descrizione del libro...
+            </p>
+        </div>-->
+
+        <div class="reviews-section">
+            <h2 class="section-title">
+                <i class="fas fa-comments"></i> Recensioni
+            </h2>
+            <div th:insert="fragments/bookReviews :: reviews(book)"></div>
+            <div th:insert="fragments/bookReviews :: reviews(bookReviews)"></div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

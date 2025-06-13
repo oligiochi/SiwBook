@@ -106,7 +106,7 @@ public class BookService {
                 case "releaseDate":
                     cmp = Comparator.comparing(Books::getReleaseDate);
                     break;
-                case "rating":
+                case "popularity":
                     cmp = Comparator.comparingDouble(b ->
                             b.getRecensioni().stream()
                                     .mapToInt(Recensione::getStelle)
@@ -139,5 +139,13 @@ public class BookService {
     public Double AvgStar(Books book){
         List<Recensione> recensioni = book.getRecensioni();
         return (Double) recensioni.stream().mapToInt(Recensione::getStelle).average().orElse(-1);
+    }
+    public Double AvgStarbyID(Long Id){
+        List<Recensione> recensioni = findById(Id).getRecensioni();
+        return (Double) recensioni.stream().mapToInt(Recensione::getStelle).average().orElse(-1);
+    }
+
+    public Books findById(Long id) {
+        return bookRepository.findById(id).orElse(null);
     }
 }

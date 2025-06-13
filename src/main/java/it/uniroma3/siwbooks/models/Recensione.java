@@ -16,12 +16,17 @@ public class Recensione {
     @JoinColumn(name = "book_id", nullable = false)
     private Books libro; // relazione: molti a uno (molte recensioni per un libro)
 
-    @Min(0)
+    @Min(1)
     @Max(5)
     private int stelle; // valore da 0 a 5
 
     @Size(max = 1000)
+    @NotNull
     private String commento;
+
+    @Size(max = 100)
+    @NotNull
+    private String titolo;
 
     @ManyToOne
     @NotNull
@@ -68,6 +73,14 @@ public class Recensione {
 
     public void setCommento(String commento) {
         this.commento = commento;
+    }
+
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public void setTitolo(String titolo) {
+        this.titolo = titolo;
     }
 
     @Override
