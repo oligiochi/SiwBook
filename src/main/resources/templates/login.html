@@ -68,6 +68,8 @@
 
             <button type="submit" class="btn login">Log in</button>
         </form>
+        <div class="error-message" th:if="${param.error}">
+            <p style="color: red">Username o password errati</p>
     </div>
 </section>
 

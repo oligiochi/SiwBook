@@ -36,11 +36,12 @@ VALUES
     (nextval('utente_seq'), 'Utente','Test','utenteTest@mail.com'),
     (nextval('utente_seq'), 'Admin','Admin','admin@mail.com');
 
-insert into recensione (stelle, author_id, book_id, id, commento,titolo)
+insert into recensione (stelle, author_id, book_id, id, commento,titolo,data)
 values
-    (5,1,1,nextval('recensione_seq'),'Review Positiva','Commento positivo'),
-    (5,1,51,nextval('recensione_seq'),'Review Positiva','Commento positivo'),
-    (4,51,51,nextval('recensione_seq'),'Review Media','Commento Medio');
+    (5,1,1,nextval('recensione_seq'),'Review Positiva','Commento positivo','2016-02-19'),
+    (5,1,51,nextval('recensione_seq'),'Review Positiva','Commento positivo','2024-04-19'),
+    (4,51,51,nextval('recensione_seq'),'Review Media','Commento Medio','2025-06-14'),
+    (3,151,1,nextval('recensione_seq'),'Test','Test','2025-06-14');
 
 INSERT INTO autore (id, nome, cognome, date_of_birth, date_of_death, nationality)
 VALUES (nextval('autore_seq'), 'Umberto', 'Eco', '1932-01-05', '2016-02-19', 'Italiana'),
@@ -57,6 +58,10 @@ INSERT INTO books_author (author_id, libri_id)
 VALUES (1, 1), -- Il nome della rosa -> Umberto Eco
        (51, 51),-- Se questo è un uomo -> Primo Levi
        (301, 51);
+
+insert into credentials (id, user_id, password, role, username,oauth_user)
+values  (nextval('credentials_seq'),201,'$2a$10$KRpc45VH8yQWOGdhlOaWzOm.9MEO3H8.v/ZGNh5.V5za6mlrQUO5y','ADMIN','ADMIN',false),
+        (nextval('credentials_seq'),151,'$2a$10$IeRJPuUQOtTFRQ1Be8pn7esXBuiMuCBUnnqTk.CVwBOD53Kj6iXnW','DEFAULT','Test',false);
 -- Se il join table si chiama books_generi, puoi popolarlo così:
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 1);
 -- INSERT INTO books_generi (books_id, generi_id) VALUES (1, 4);

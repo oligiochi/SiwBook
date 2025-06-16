@@ -3,6 +3,7 @@ package it.uniroma3.siwbooks.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -19,6 +20,7 @@ public class Recensione {
     @Min(1)
     @Max(5)
     private int stelle; // valore da 0 a 5
+    private LocalDateTime data;
 
     @Size(max = 1000)
     @NotNull
@@ -81,6 +83,14 @@ public class Recensione {
 
     public void setTitolo(String titolo) {
         this.titolo = titolo;
+    }
+
+    public LocalDateTime getData() {
+        return data;
+    }
+
+    public void setData(LocalDateTime data) {
+        this.data = data;
     }
 
     @Override

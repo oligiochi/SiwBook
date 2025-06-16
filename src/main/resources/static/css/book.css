@@ -16,11 +16,11 @@ body {
 
 .container {
     display: flex;
-    justify-content: center;   /* orizzontalmente */
-    align-items: center;       /* verticalmente */
-    height: 100vh;             /* riempie tutta l'altezza della finestra */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     max-width: 1200px;
-    margin: 0 auto;            /* centra orizzontalmente su schermi larghi */
+    margin: 0 auto;
     padding: 20px;
 }
 
@@ -127,6 +127,12 @@ body {
     font-size: 20px;
 }
 
+.book-rating {
+    color: #ffc107;
+    font-size: 20px;
+    font-weight: bold;
+}
+
 /* 8. DESCRIPTION */
 .book-description {
     padding: 25px 30px;
@@ -135,7 +141,7 @@ body {
     color: #555;
 }
 
-/* 9. REVIEWS SECTION */
+/* 9. REVIEWS SECTION HEADER */
 .reviews-section {
     padding: 25px 30px;
 }
@@ -147,77 +153,13 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    justify-content: space-between;
 }
 
 .section-title i {
     color: #3498db;
 }
 
-.reviews-container {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.review {
-    background: #f9fafb;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    border-left: 4px solid #3498db;
-}
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.reviewer {
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 18px;
-}
-
-.review-title {
-    display: block;
-    font-size: 14px;         /* più piccolo per sembrare un sottotitolo */
-    font-weight: 500;        /* leggermente meno “pesante” */
-    color: #34495e;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin: 12px 0 4px;      /* 12px sopra, 4px sotto */
-    line-height: 1.3;
-    opacity: 0.85;           /* un po’ di trasparenza per renderlo meno dominante */
-}
-
-.book-rating {
-    color: #ffc107;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.review-date {
-    color: #7f8c8d;
-    font-size: 14px;
-}
-
-.review-content {
-    color: #555;
-    line-height: 1.6;
-}
-
-.review-rating {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #FFD700;
-}
-
-.empty-stars {
-    color: #ddd;
-}
 
 .no-reviews {
     text-align: center;
@@ -226,7 +168,7 @@ body {
     font-style: italic;
 }
 
-/* 10. RESPONSIVE */
+/* 10. RESPONSIVE ADJUSTMENTS */
 @media (max-width: 700px) {
     .book-header {
         flex-direction: column;

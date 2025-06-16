@@ -42,6 +42,6 @@ public class IndexController {
 
     @GetMapping("/admin")
     public String showAdminIndex() {
-        return ADMIN_INDEX_VIEW;
+        return INDEX_VIEW;
     }
 }

@@ -67,6 +67,7 @@ public class BookService {
             Pageable pageable
     ) {
         // 1) Recupera tutti i libri o filtra per termine
+
         List<Books> all = new ArrayList<>();
         if (searchTerm != null && !searchTerm.isBlank()) {
             all = bookRepository.searchByTerm(searchTerm);
@@ -94,6 +95,21 @@ public class BookService {
                     .collect(Collectors.toList());
         }
 
+        extracted(sort, all);
+
+        // 5) Sotto-lista per paginazione
+        int total = all.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), total);
+        List<Books> content = start <= end
+                ? all.subList(start, end)
+                : List.of();
+
+        // 6) Restituisci la Page
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    private void extracted(Sort sort, List<Books> all) {
         // 4) Applica l'ordinamento in memoria
         Comparator<Books> cmp = Comparator.comparing(Books::getReleaseDate).reversed();
         if (sort.isSorted()) {
@@ -124,18 +140,8 @@ public class BookService {
             if (!asc) cmp = cmp.reversed();
         }
         all.sort(cmp);
-
-        // 5) Sotto-lista per paginazione
-        int total = all.size();
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), total);
-        List<Books> content = start <= end
-                ? all.subList(start, end)
-                : List.of();
-
-        // 6) Restituisci la Page
-        return new PageImpl<>(content, pageable, total);
     }
+
     public Double AvgStar(Books book){
         List<Recensione> recensioni = book.getRecensioni();
         return (Double) recensioni.stream().mapToInt(Recensione::getStelle).average().orElse(-1);

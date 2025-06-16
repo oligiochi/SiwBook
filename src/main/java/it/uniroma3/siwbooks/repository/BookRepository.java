@@ -25,7 +25,7 @@ public interface BookRepository extends CrudRepository<Books, Long> {
                OR LOWER(b.title)   LIKE LOWER(CONCAT('%', :searchTerm, '%'))
                OR LOWER(ca.nome)   LIKE LOWER(CONCAT('%', :searchTerm, '%'))
                OR LOWER(ca.cognome)LIKE LOWER(CONCAT('%', :searchTerm, '%'))
-               OR LOWER(g.genere)    LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(g.genere) = LOWER(:searchTerm)                    
               )
     """)
     List<Books> searchByTerm(@Param("searchTerm") String searchTerm);

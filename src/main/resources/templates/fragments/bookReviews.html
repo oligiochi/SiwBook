@@ -1,6 +1,7 @@
 <!-- fragments/bookReviews.html -->
-<div th:fragment="reviews(reviewsList)">
-    <div class="reviews-container" th:if="${not #lists.isEmpty(reviewsList)}">
+<div th:fragment="reviews(reviewsList)" xmlns:sec="http://www.w3.org/1999/xhtml">
+    <link rel="stylesheet" th:href="@{/css/fragmentStyles/bookReview.css}" />
+    <div class="reviews-container" th:if="${reviewsList!=null} and ${not #lists.isEmpty(reviewsList)}">
         <div class="review" th:each="r : ${reviewsList}">
             <div class="review-header">
                 <div class="reviewer"
@@ -8,11 +9,22 @@
                     <!-- Nome recensione -->
                 </div>
                 <!-- Se ti serve la data, usa #temporals e una proprietà r.date -->
-                <!--
                 <div class="review-date"
-                     th:text="${#temporals.format(r.date, 'dd MMMM yyyy')}">
+                     th:text="${#temporals.format(r.data, 'dd MMMM yyyy')}">
                 </div>
-                -->
+
+                <div th:if="${#authorization.expression('hasAuthority(''ADMIN'')') or (r != null and r.author?.id == currentUser?.id)}"
+                     class="menu-button-container">
+                    <button class="menu-button" onclick="toggleMenu(this)">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="menu-dropdown hidden">
+                        <a th:if="${r.author}==${currentUser}" th:href="@{'/updateReview/' + ${r.author.id}}">Modifica</a>
+                        <a th:href="@{'/deleteReview/' + ${r.author.id}}"
+                           onclick="return confirm('Eliminare la recensione?')">Elimina</a>
+                    </div>
+                </div>
+
             </div>
             <div class="review-rating">
                 <i class="fas"
@@ -20,7 +32,6 @@
                    th:classappend="${i <= r.stelle} ? ' fa-star' : ' fa-star empty-stars'">
                 </i>
             </div>
-
             <div class="review-title" th:text="${r.titolo}">
                 Titolo recensione
             </div>
