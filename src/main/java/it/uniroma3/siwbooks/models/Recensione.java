@@ -22,11 +22,11 @@ public class Recensione {
     private int stelle; // valore da 0 a 5
     private LocalDateTime data;
 
-    @Size(max = 1000)
+    @Size(min=10,max = 500)
     @NotBlank
     private String commento;
 
-    @Size(max = 100)
+    @Size(min=5,max = 80)
     @NotBlank
     private String titolo;
 

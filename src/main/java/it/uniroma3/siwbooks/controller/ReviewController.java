@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -71,12 +72,22 @@ class ReviewController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("book", book);
             model.addAttribute("reviews", reviewService.findByLibro(book));
-            List<String> errorMessages = bindingResult.getAllErrors()
-                    .stream()
-                    .map(ObjectError::getDefaultMessage)
-                    .toList();
+            List<String> errorMessages = new ArrayList<>();
 
-            model.addAttribute("error", errorMessages);
+// 1. Errori di campo, con nome del campo
+            bindingResult.getFieldErrors().forEach(fe -> {
+                String field = fe.getField();
+                String msg   = fe.getDefaultMessage();
+                errorMessages.add(String.format("%s: %s", field, msg));
+            });
+
+// 2. Errori globali (ObjectError)
+            bindingResult.getGlobalErrors().forEach(oe -> {
+                errorMessages.add(oe.getDefaultMessage());
+            });
+
+            model.addAttribute("errors", errorMessages);
+
             return "/recensioniForm";
         }
         Utente currentUser = userService.getCurrentUser();
