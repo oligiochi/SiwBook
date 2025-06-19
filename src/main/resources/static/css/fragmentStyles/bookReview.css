@@ -61,4 +61,12 @@
 .review-content {
     color: #555;
     line-height: 1.6;
+    /* permette il wrapping sui punti di interruzione naturale */
+    white-space: pre-wrap;
+    /* spezza parole troppo lunghe se necessario */
+    word-wrap: break-word;
+    /* in alternativa: overflow-wrap: break-word; */
+    overflow-wrap: break-word;
+    /* margine per non appiccicare il testo ai bordi */
+    margin: 0.5rem 0;
 }

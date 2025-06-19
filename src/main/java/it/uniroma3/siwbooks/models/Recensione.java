@@ -23,15 +23,14 @@ public class Recensione {
     private LocalDateTime data;
 
     @Size(max = 1000)
-    @NotNull
+    @NotBlank
     private String commento;
 
     @Size(max = 100)
-    @NotNull
+    @NotBlank
     private String titolo;
 
     @ManyToOne
-    @NotNull
     private Utente author;
 
     // --- Getter e Setter ---

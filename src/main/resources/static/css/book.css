@@ -15,28 +15,55 @@ body {
 }
 
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
 }
 
-/* 3. BOOK CARD */
+/* 3. SECTIONS */
+.top-bar-section {
+    background-color: #ffffff;
+}
+
+.book-details-section {
+    padding: 3rem 0;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ccc;
+}
+
+.book-reviews-section {
+    padding: 3rem 0;
+    background-color: #ffffff;
+}
+
+/* Divider */
+.section-divider {
+    border: none;
+    border-top: 2px solid #ccc;
+    margin: 0 auto;
+    width: 80%;
+}
+
+/* 4. BOOK CARD */
 .book-card {
     background: white;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     overflow: hidden;
-    width: 100%;
-    max-width: 800px;
+    width: 80%;          /* da 100% a 75% */
+    max-width: 900px;    /* mantiene comunque un limite massimo */
+    margin: 0 auto;      /* centra orizzontalmente */
     display: flex;
     flex-direction: column;
 }
+.book-details-section .container {
+    display: flex;
+    justify-content: center;  /* orizzontale */
+    align-items: center;      /* verticale */
+}
 
-/* 4. HEADER */
+
+/* 5. HEADER */
 .book-header {
     display: flex;
     padding: 30px;
@@ -44,7 +71,7 @@ body {
     color: white;
 }
 
-/* 5. COVER IMAGE */
+/* 6. COVER IMAGE */
 .book-cover img {
     width: 180px;
     height: 270px;
@@ -53,7 +80,7 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* 6. DETAILS */
+/* 7. DETAILS */
 .book-details {
     flex: 1;
     padding: 15px 0 15px 30px;
@@ -88,7 +115,7 @@ body {
     font-size: 14px;
 }
 
-/* 7. META INFO */
+/* 8. META INFO */
 .book-meta {
     display: flex;
     gap: 25px;
@@ -133,7 +160,7 @@ body {
     font-weight: bold;
 }
 
-/* 8. DESCRIPTION */
+/* 9. DESCRIPTION (opzionale) */
 .book-description {
     padding: 25px 30px;
     border-bottom: 1px solid #eee;
@@ -141,9 +168,11 @@ body {
     color: #555;
 }
 
-/* 9. REVIEWS SECTION HEADER */
+/* 10. REVIEWS */
 .reviews-section {
     padding: 25px 30px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .section-title {
@@ -160,7 +189,6 @@ body {
     color: #3498db;
 }
 
-
 .no-reviews {
     text-align: center;
     padding: 30px;
@@ -168,19 +196,32 @@ body {
     font-style: italic;
 }
 
-/* 10. RESPONSIVE ADJUSTMENTS */
+/* Optional: scroll interno alla sezione recensioni se troppo lunga */
+/*
+.reviews-section {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+*/
+
+/* 11. RESPONSIVE */
 @media (max-width: 700px) {
     .book-header {
         flex-direction: column;
         align-items: center;
         text-align: center;
     }
+
     .book-details {
         padding: 25px 0 0;
     }
+
     .book-meta {
         justify-content: center;
     }
+
     .book-cover img {
         margin-bottom: 20px;
     }

@@ -79,17 +79,18 @@ public class LibriController {
         // 2) utente corrente
         Utente currentUser = userService.getCurrentUser();
 
-        // 3) split in due liste: recensioni dell'utente e recensioni degli altri
-        Map<Boolean, List<Recensione>> partitioned = allReviews.stream()
-                .collect(Collectors.partitioningBy(r -> currentUser != null && r.getAuthor().equals(currentUser)));
+        List<Recensione> sortedReviews = allReviews.stream()
+                .sorted(Comparator.comparing(
+                        r -> !(currentUser != null && r.getAuthor().equals(currentUser))
+                ))
+                .collect(Collectors.toList());
 
-        List<Recensione> userReviews  = partitioned.get(true);
-        List<Recensione> otherReviews = partitioned.get(false);
+        boolean hasUserReview = !sortedReviews.isEmpty() && sortedReviews.getFirst().getAuthor().equals(currentUser);
 
         // 4) aggiungi al modello
         model.addAttribute("book",        bookService.findById(id));
-        model.addAttribute("userReviews",  userReviews);
-        model.addAttribute("bookReviews",  otherReviews);
+        model.addAttribute("hasUserReview",  hasUserReview);
+        model.addAttribute("bookReviews",  sortedReviews);
 
         return "book";
     }

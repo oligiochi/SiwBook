@@ -44,7 +44,7 @@
                     <div class="book-meta">
                         <span class="book-rating">
                             <i class="fas fa-star"></i>
-                            <span th:text="${book.star != -1 ? book.star : 'N.D.'}">4.5</span>
+                            <span th:text="${book.star != -1 ? #numbers.formatDecimal(book.star,1,2) : 'N.D.'}">4.5</span>
                         </span>
                         <span class="book-year" th:text="${#temporals.format(book.releaseDate, 'yyyy')}">2023</span>
                     </div>

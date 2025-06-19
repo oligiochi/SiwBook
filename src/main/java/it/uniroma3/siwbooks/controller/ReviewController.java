@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 class ReviewController {
@@ -65,10 +68,15 @@ class ReviewController {
                              Model model, Principal principal) {
 
         Books book = bookService.findById(bookId);
-
         if (bindingResult.hasErrors()) {
             model.addAttribute("book", book);
             model.addAttribute("reviews", reviewService.findByLibro(book));
+            List<String> errorMessages = bindingResult.getAllErrors()
+                    .stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .toList();
+
+            model.addAttribute("error", errorMessages);
             return "/recensioniForm";
         }
         Utente currentUser = userService.getCurrentUser();
@@ -76,6 +84,7 @@ class ReviewController {
             redirectAttributes.addFlashAttribute("error", "Hai già recensito questo libro.");
             return "redirect:/accessDenied";
         }
+        review.setData(LocalDateTime.now());
         review.setAuthor(userService.getCurrentUser());
         review.setLibro(book);
 
