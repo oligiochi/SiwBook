@@ -1,0 +1,208 @@
+/* RESET SOLO PER IL FORM DI RECENSIONE */
+.review-form-card,
+.review-form-card * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* mantiene il reset confinato alla card,
+   quindi la top-bar non subirà override */
+
+/* BACKGROUND E CENTRATURA */
+.warped_box_for_card {
+    display: flex;
+    flex-direction: column;    /* da aggiungere */
+    justify-content: flex-start; /* o center, a seconda di come vuoi allineare verticalmente */
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+
+/* STILI DELLA CARD */
+.review-form-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* SEZIONE TITOLO */
+.title-section {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.title-section h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    font-weight: 500;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+}
+
+/* FORM GROUP */
+.form-group {
+    margin-bottom: 25px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+/* INPUT E TEXTAREA */
+.input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 1px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background-color: #f8f9fa;
+}
+.input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+textarea.input {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* SEZIONE STELLE */
+.rating-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+.rating-label {
+    margin-right: 15px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+.stars {
+    display: flex;
+    gap: 5px;
+}
+.star {
+    font-size: 1.8rem;
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star.active {
+    color: #f1c40f;
+}
+
+/* BOTTONI */
+.btn-container {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+.btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    position: relative;
+}
+.submit-btn {
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+}
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+.reset-btn {
+    background-color: transparent;
+    border: 2px solid #e74c3c;
+    color: #e74c3c;
+}
+.reset-btn:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* CONTATORI CARATTERI */
+.character-count {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+.character-count.warning {
+    color: #e67e22;
+}
+.character-count.error {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+/* MEDIA QUERY */
+@media (max-width: 600px) {
+    .review-form-card {
+        padding: 30px 20px;
+    }
+
+    .title-section h1 {
+        font-size: 2rem;
+    }
+
+    .btn-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* ANIMAZIONI ED ERRORI */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.input-error {
+    border-color: #e74c3c !important;
+}
+.error-message {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    text-align: left;
+    margin-top: 5px;
+}
+.success-message {
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    display: none;
+}

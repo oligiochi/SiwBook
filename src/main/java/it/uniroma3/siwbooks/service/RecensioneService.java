@@ -2,6 +2,7 @@ package it.uniroma3.siwbooks.service;
 
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.models.Recensione;
+import it.uniroma3.siwbooks.models.Utente;
 import it.uniroma3.siwbooks.repository.RecensioneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,9 @@ public class RecensioneService {
 
     public List<Recensione> getBookReviews(Long bookId) {
         return recensioneRepository.findByLibro_Id(bookId);
+    }
+
+    public boolean userHasAlreadyReviewed(Books book, Utente currentUser) {
+        return recensioneRepository.existsByLibroAndAuthor(book,currentUser);
     }
 }

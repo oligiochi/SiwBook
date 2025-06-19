@@ -67,7 +67,8 @@
                 <span class="section-title-main">
                     <i class="fas fa-comments"></i> Recensioni
                 </span>
-                <a sec:authorize="isAuthenticated()" class="section-title-link" th:href="@{/book/reviews/add/${book.id}}">
+                <a sec:authorize="isAuthenticated()" class="section-title-link" th:href="@{/book/{id}/addReview(id=${book.id})}
+">
                     <i class="fas fa-plus"></i>
                 </a>
             </h2>

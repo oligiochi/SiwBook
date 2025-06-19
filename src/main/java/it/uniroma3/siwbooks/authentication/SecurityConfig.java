@@ -56,8 +56,17 @@ public class SecurityConfig {
         https
                 .csrf(csrf -> csrf.disable()).cors(cors->cors.disable())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/login", "/register", "/books/**", "/author/**","/book/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority(ADMIN_ROLE)
+                        // pagine e risorse su cui tutti possono fare GET
+                        .requestMatchers(HttpMethod.GET,"/","/login","/register","/index","/author/**","/authors","/search","/book/**","/books","/css/**", "/images/**", "favicon.ico").permitAll()
+                        // pagine e risorse su cui tutti possono fare POST
+                        .requestMatchers(HttpMethod.POST,"/search","/register","/login").permitAll()
+
+                        // pagine e risorse su cui solo gli ADMIN possono fare GET
+                        .requestMatchers(HttpMethod.GET,"/admin/**").hasAnyAuthority(ADMIN_ROLE)
+                        // pagine e risorse su cui solo gli ADMIN possono fare POST
+                        .requestMatchers(HttpMethod.POST,"/admin/**").hasAnyAuthority(ADMIN_ROLE)
+
+                        // pagine non elencate sopra richiedono auth (autenticato come ADMIN o come DEFAULT)
                         .anyRequest().authenticated()
                 ).formLogin(login -> login
                         .loginPage("/login")
