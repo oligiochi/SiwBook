@@ -29,6 +29,7 @@ public class GlobalController {
     public Utente getCurrentUser(){
         return userService.getCurrentUser();
     }
+
     @ExceptionHandler(Exception.class)
     public String handleAllErrors(Exception ex, Model model) {
         model.addAttribute("message", ex.getMessage());

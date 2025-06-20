@@ -51,4 +51,10 @@ public class RecensioneService {
     public boolean userHasAlreadyReviewed(Books book, Utente currentUser) {
         return recensioneRepository.existsByLibroAndAuthor(book,currentUser);
     }
+    public void UpgradeRecensione(Recensione recensione, int stelle, String commento,String titolo ) {
+        recensione.setStelle(stelle);
+        recensione.setCommento(commento);
+        recensione.setTitolo(titolo);
+        recensioneRepository.save(recensione);
+    }
 }

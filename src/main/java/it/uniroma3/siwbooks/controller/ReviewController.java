@@ -132,7 +132,7 @@ class ReviewController {
         return "redirect:/book/" + bookId;
     }
 
-    @GetMapping("/book/{book_id}/updateReview/{review_id}")
+    @GetMapping("/book/{book_id}/UpdateReview/{review_id}")
     public String updateReview(@PathVariable("book_id") Long bookId,
                                @PathVariable("review_id") Long reviewId,
                                Model model) {
@@ -140,13 +140,13 @@ class ReviewController {
         Books book = bookService.findById(bookId);
         if (userService.getCurrentUser() == review.getAuthor()) {
             model.addAttribute("review", review);
-            model.addAttribute("formAction", "/book/" + book.getId() + "/updateReview/" + review.getId());
-            return "formModifyReview";
+            model.addAttribute("formAction", "/book/" + book.getId() + "/UpdateReview/" + review.getId());
+            return "recensioniForm";
         }
-        model.addAttribute("error", "Non puoi modificare questa recensione.");
+        model.addAttribute("message", "Non puoi modificare questa recensione.");
         return "customError";
     }
-    @PostMapping("/book/{book_id}/updateReview/{review_id}")
+    @PostMapping("/book/{book_id}/UpdateReview/{review_id}")
     public String updateReview(@PathVariable("book_id") Long bookId,
                                @PathVariable("review_id") Long reviewId,
                                @Valid @ModelAttribute("review") Recensione review,
@@ -173,11 +173,12 @@ class ReviewController {
 
         }
         Utente currentUser = userService.getCurrentUser();
-        if (currentUser.equals(review.getAuthor())) {
-            recensioneService.save(review); //finire dopo fa troppo caldo
+        if (currentUser.equals(reviewService.findById(reviewId).getAuthor())) {
+            recensioneService.UpgradeRecensione(reviewService.findById(reviewId),review.getStelle(),review.getCommento(),review.getTitolo());
             return "redirect:/book/" + bookId;
+        }else {
+            model.addAttribute("message", "Non puoi modificare questa recensione.");
+            return "customError";
         }
-
-        return "";
     }
 }
