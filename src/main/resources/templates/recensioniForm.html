@@ -18,7 +18,7 @@
     <p class="subtitle">Condividi la tua esperienza con la community</p>
   </div>
 
-  <form id="reviewForm" th:action="@{/book/{id}/addReview(id=${book.id})}" th:object="${review}" method="post">
+  <form id="reviewForm" th:action="@{${formAction}}" th:object="${review}" method="post">
     <div class="form-group">
       <label for="reviewTitle">Titolo Recensione</label>
       <input type="text" id="reviewTitle" class="input" placeholder="Inserisci un titolo significativo"

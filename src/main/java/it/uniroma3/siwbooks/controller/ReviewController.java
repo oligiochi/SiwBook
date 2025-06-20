@@ -63,7 +63,7 @@ class ReviewController {
             return "redirect:/book/" + bookId + "#addReviewButton";
         }
         model.addAttribute("review", new Recensione());
-        model.addAttribute("book", bookService.findById(bookId));
+        model.addAttribute("formAction", "/book/" + book.getId() + "/addReview");
         return "recensioniForm";
     }
 
@@ -130,5 +130,54 @@ class ReviewController {
             redirectAttributes.addFlashAttribute("error", "Non puoi eliminare questa recensione.");
         }
         return "redirect:/book/" + bookId;
+    }
+
+    @GetMapping("/book/{book_id}/updateReview/{review_id}")
+    public String updateReview(@PathVariable("book_id") Long bookId,
+                               @PathVariable("review_id") Long reviewId,
+                               Model model) {
+        Recensione review = reviewService.findById(reviewId);
+        Books book = bookService.findById(bookId);
+        if (userService.getCurrentUser() == review.getAuthor()) {
+            model.addAttribute("review", review);
+            model.addAttribute("formAction", "/book/" + book.getId() + "/updateReview/" + review.getId());
+            return "formModifyReview";
+        }
+        model.addAttribute("error", "Non puoi modificare questa recensione.");
+        return "customError";
+    }
+    @PostMapping("/book/{book_id}/updateReview/{review_id}")
+    public String updateReview(@PathVariable("book_id") Long bookId,
+                               @PathVariable("review_id") Long reviewId,
+                               @Valid @ModelAttribute("review") Recensione review,
+                               BindingResult bindingResult,
+                               RedirectAttributes redirectAttributes,
+                               Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("reviews", review);
+            List<String> errorMessages = new ArrayList<>();
+            bindingResult.getFieldErrors().forEach(fe -> {
+                String field = fe.getField();
+                String msg   = fe.getDefaultMessage();
+                errorMessages.add(String.format("%s: %s", field, msg));
+            });
+
+// 2. Errori globali (ObjectError)
+            bindingResult.getGlobalErrors().forEach(oe -> {
+                errorMessages.add(oe.getDefaultMessage());
+            });
+
+            model.addAttribute("errors", errorMessages);
+
+            return "/recensioniForm";
+
+        }
+        Utente currentUser = userService.getCurrentUser();
+        if (currentUser.equals(review.getAuthor())) {
+            recensioneService.save(review); //finire dopo fa troppo caldo
+            return "redirect:/book/" + bookId;
+        }
+
+        return "";
     }
 }
