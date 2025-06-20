@@ -1,5 +1,5 @@
 <!-- fragments/bookReviews.html -->
-<div th:fragment="reviews(reviewsList)" xmlns:sec="http://www.w3.org/1999/xhtml">
+<div th:fragment="reviews(reviewsList,book)" xmlns:sec="http://www.w3.org/1999/xhtml">
     <link rel="stylesheet" th:href="@{/css/fragmentStyles/bookReview.css}" />
     <div class="reviews-container" th:if="${reviewsList!=null} and ${not #lists.isEmpty(reviewsList)}">
         <div class="review" th:each="r : ${reviewsList}">
@@ -20,7 +20,7 @@
                     </button>
                     <div class="menu-dropdown hidden">
                         <a th:if="${r.author}==${currentUser}" th:href="@{'/updateReview/' + ${r.author.id}}">Modifica</a>
-                        <a th:href="@{'/deleteReview/' + ${r.author.id}}"
+                        <a th:href="@{/book/{book_id}/DeleteReviwe/{recensione_id}(book_id=${book.id},recensione_id=${r.id})}"
                            onclick="return confirm('Eliminare la recensione?')">Elimina</a>
                     </div>
                 </div>

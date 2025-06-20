@@ -6,10 +6,13 @@ import it.uniroma3.siwbooks.models.Utente;
 import it.uniroma3.siwbooks.service.BookService;
 import it.uniroma3.siwbooks.service.RecensioneService;
 import it.uniroma3.siwbooks.service.UtenteService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,6 +29,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import static it.uniroma3.siwbooks.models.Credentials.ADMIN_ROLE;
 
 @Controller
 class ReviewController {
@@ -38,6 +42,8 @@ class ReviewController {
 
     @Autowired
     private BookService bookService;
+    @Autowired
+    private RecensioneService recensioneService;
 
     @GetMapping("/book/{book_id}/addReview")
     public String addReview(@PathVariable("book_id") Long bookId,
@@ -101,6 +107,28 @@ class ReviewController {
 
         reviewService.save(review);
 
+        return "redirect:/book/" + bookId;
+    }
+    @GetMapping("/book/{book_id}/DeleteReviwe/{recenzione_id}")
+    public String deleteReview(@PathVariable("book_id") Long bookId,
+                             @PathVariable("recenzione_id") Long recenzioneId,
+                             RedirectAttributes redirectAttributes,
+                             HttpServletRequest request,
+                             Model model) {
+        Recensione review = reviewService.findById(recenzioneId);
+        GrantedAuthority adminAuth = new SimpleGrantedAuthority(ADMIN_ROLE);
+        boolean isAdmin = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .contains(adminAuth);
+        if (review == null) {
+            redirectAttributes.addFlashAttribute("error", "Recensione non trovata.");
+        } else if (review.getAuthor().equals(userService.getCurrentUser()) || isAdmin) {
+            System.out.println("recensione: cancellata" + review);
+            recensioneService.delete(review);
+        }else{
+            redirectAttributes.addFlashAttribute("error", "Non puoi eliminare questa recensione.");
+        }
         return "redirect:/book/" + bookId;
     }
 }
