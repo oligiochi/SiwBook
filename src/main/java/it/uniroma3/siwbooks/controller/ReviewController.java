@@ -29,6 +29,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static it.uniroma3.siwbooks.authentication.SecurityUtil.isIsAdmin;
 import static it.uniroma3.siwbooks.models.Credentials.ADMIN_ROLE;
 
 @Controller
@@ -116,11 +118,7 @@ class ReviewController {
                              HttpServletRequest request,
                              Model model) {
         Recensione review = reviewService.findById(recenzioneId);
-        GrantedAuthority adminAuth = new SimpleGrantedAuthority(ADMIN_ROLE);
-        boolean isAdmin = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getAuthorities()
-                .contains(adminAuth);
+        boolean isAdmin = isIsAdmin();
         if (review == null) {
             redirectAttributes.addFlashAttribute("error", "Recensione non trovata.");
         } else if (review.getAuthor().equals(userService.getCurrentUser()) || isAdmin) {

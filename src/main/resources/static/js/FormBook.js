@@ -9,62 +9,80 @@ document.addEventListener('DOMContentLoaded', function() {
         titleCount.textContent = titleInput.value.length;
     });
 
-    // Seleziona dropdown autori e generi (popolati da Thymeleaf)
+    // Dropdown autori e generi
     const authorDropdown = document.getElementById('authorDropdown');
-    const genreDropdown = document.getElementById('genreDropdown');
+    const genreDropdown  = document.getElementById('genreDropdown');
 
-    // Funzione per multi-select (autori/generi)
-    function setupMultiSelect(inputEl, dropdownEl, selectedEl) {
+    // Setup multi-select per autori
+    setupMultiSelect(
+        document.getElementById('authorInput'),
+        authorDropdown,
+        document.getElementById('selectedAuthors'),
+        document.getElementById('authorsField')
+    );
+
+    // Setup multi-select per generi
+    setupMultiSelect(
+        document.getElementById('genreInput'),
+        genreDropdown,
+        document.getElementById('selectedGenres'),
+        document.getElementById('genresField')
+    );
+
+    // Funzione generica: crea tag + aggiorna hidden list
+    function setupMultiSelect(inputEl, dropdownEl, selectedEl, hiddenField) {
         const items = dropdownEl.querySelectorAll('.dropdown-item');
-        inputEl.addEventListener('focus', () => dropdownEl.style.display = 'block');
-        inputEl.addEventListener('blur', () => setTimeout(() => dropdownEl.style.display = 'none', 200));
-        inputEl.addEventListener('input', filterItems);
+        const selectedIds = [];
+
+        inputEl.addEventListener('focus',  () => dropdownEl.style.display = 'block');
+        inputEl.addEventListener('blur',   () => setTimeout(() => dropdownEl.style.display = 'none', 200));
+        inputEl.addEventListener('input',   filterItems);
+
         items.forEach(i => i.addEventListener('click', () => {
-            addItem(i.dataset.id, i.textContent);
+            const id = i.dataset.id;
+            if (!selectedIds.includes(id)) {
+                addItem(id, i.textContent);
+                selectedIds.push(id);
+                updateHidden();
+            }
             inputEl.value = '';
             filterItems();
         }));
 
         function filterItems() {
             const term = inputEl.value.toLowerCase();
-            const selIds = Array.from(selectedEl.children).map(c => c.dataset.id);
             items.forEach(i => {
-                const match = i.textContent.toLowerCase().includes(term) && !selIds.includes(i.dataset.id);
-                i.style.display = match ? 'block' : 'none';
+                const already = selectedIds.includes(i.dataset.id);
+                const match = i.textContent.toLowerCase().includes(term);
+                i.style.display = (!already && match) ? 'block' : 'none';
             });
         }
+
         function addItem(id, name) {
-            if (!Array.from(selectedEl.children).some(c => c.dataset.id === id)) {
-                const el = document.createElement('div');
-                el.className = 'selected-item';
-                el.dataset.id = id;
-                el.innerHTML = `${name}<button class="remove-item">&times;</button>`;
-                el.querySelector('.remove-item').addEventListener('click', () => {
-                    el.remove();
-                    filterItems();
-                });
-                selectedEl.appendChild(el);
-            }
+            const el = document.createElement('div');
+            el.className = 'selected-item';
+            el.dataset.id = id;
+            el.innerHTML = `${name} <button class="remove-item">&times;</button>`;
+            el.querySelector('.remove-item').addEventListener('click', () => {
+                el.remove();
+                const idx = selectedIds.indexOf(id);
+                if (idx > -1) selectedIds.splice(idx, 1);
+                updateHidden();
+                filterItems();
+            });
+            selectedEl.appendChild(el);
+        }
+
+        function updateHidden() {
+            hiddenField.value = selectedIds.join(',');
         }
     }
 
-    // Inizializza i multi-select
-    setupMultiSelect(
-        document.getElementById('authorInput'),
-        authorDropdown,
-        document.getElementById('selectedAuthors')
-    );
-    setupMultiSelect(
-        document.getElementById('genreInput'),
-        genreDropdown,
-        document.getElementById('selectedGenres')
-    );
-
     // Upload immagini e drag’n’drop
     const uploadTrigger = document.getElementById('uploadTrigger');
-    const imageUpload = document.getElementById('imageUpload');
-    const imagePreview = document.getElementById('imagePreview');
-    const dropArea = document.getElementById('dropArea');
+    const imageUpload   = document.getElementById('imageUpload');
+    const imagePreview  = document.getElementById('imagePreview');
+    const dropArea      = document.getElementById('dropArea');
 
     uploadTrigger.addEventListener('click', () => imageUpload.click());
     imageUpload.addEventListener('change', e => {
@@ -107,11 +125,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Gestione form, reset e successo
-    const bookForm = document.getElementById('bookForm');
+    const bookForm      = document.getElementById('bookForm');
     const successMessage = document.getElementById('successMessage');
     bookForm.addEventListener('reset', () => {
         document.getElementById('selectedAuthors').innerHTML = '';
-        document.getElementById('selectedGenres').innerHTML = '';
+        document.getElementById('selectedGenres').innerHTML  = '';
+        document.getElementById('authorsField').value       = '';
+        document.getElementById('genresField').value        = '';
         imagePreview.innerHTML = '';
         imageFiles = [];
         titleCount.textContent = '0';

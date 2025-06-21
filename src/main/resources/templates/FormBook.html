@@ -21,13 +21,13 @@
       <p class="subtitle">Compila tutti i campi per inserire un nuovo libro nel catalogo</p>
     </div>
 
-    <form id="bookForm">
+    <form id="bookForm" th:action="@{/books/add}" method="post" enctype="multipart/form-data">
+
       <!-- Titolo del libro -->
       <div class="form-group">
         <label for="bookTitle">Titolo del Libro *</label>
-        <input type="text" id="bookTitle" class="input" placeholder="Inserisci il titolo del libro" required>
+        <input type="text" id="bookTitle" name="title" class="input" placeholder="Inserisci il titolo del libro" required>
         <div class="character-count"><span id="titleCount">0</span>/120 caratteri</div>
-       <!-- <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>-->
       </div>
 
       <!-- Autori -->
@@ -37,10 +37,13 @@
           <div class="selected-items" id="selectedAuthors">
             <!-- Selected authors will appear here -->
           </div>
+          <!-- hidden field for authors list -->
+          <input type="hidden" id="authorsField" name="authors" value="">
+
           <input type="text" id="authorInput" class="input" placeholder="Cerca o aggiungi un autore...">
           <div class="dropdown" id="authorDropdown">
             <div class="dropdown-item" th:each="author : ${authors}"
-                 th:data-id="${author.id}" th:text="${author.nome}+' '+${author.cognome}">
+                 th:data-id="${author.id}" th:text="${author.nome} + ' ' + ${author.cognome}">
             </div>
           </div>
         </div>
@@ -53,6 +56,9 @@
           <div class="selected-items" id="selectedGenres">
             <!-- Selected genres will appear here -->
           </div>
+          <!-- hidden field for genres list -->
+          <input type="hidden" id="genresField" name="genres" value="">
+
           <input type="text" id="genreInput" class="input" placeholder="Cerca o aggiungi un genere...">
           <div class="dropdown" id="genreDropdown">
             <div class="dropdown-item" th:each="genre : ${genres}"
@@ -66,7 +72,7 @@
       <div class="form-group">
         <label for="releaseDate">Data di Pubblicazione *</label>
         <div class="date-picker">
-          <input type="date" id="releaseDate" class="input" required>
+          <input type="date" id="releaseDate" name="releaseDate" class="input" required>
         </div>
       </div>
 
@@ -74,7 +80,7 @@
       <div class="form-group">
         <label>Copertina e Immagini</label>
         <div class="image-upload-container" id="dropArea">
-          <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+          <input type="file" id="imageUpload" name="images" accept="image/*" multiple style="display: none;">
           <button type="button" id="uploadTrigger" class="btn submit-btn" style="max-width: 200px; margin: 0 auto;">
             <i class="fas fa-cloud-upload-alt"></i> Scegli Immagini
           </button>

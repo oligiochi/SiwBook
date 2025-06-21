@@ -1,11 +1,9 @@
 package it.uniroma3.siwbooks.controller;
 
+import it.uniroma3.siwbooks.controller.validator.BookValidator;
 import it.uniroma3.siwbooks.dto.BookInfoDto;
 import it.uniroma3.siwbooks.dto.GenreDto;
-import it.uniroma3.siwbooks.models.Books;
-import it.uniroma3.siwbooks.models.Genere;
-import it.uniroma3.siwbooks.models.Recensione;
-import it.uniroma3.siwbooks.models.Utente;
+import it.uniroma3.siwbooks.models.*;
 import it.uniroma3.siwbooks.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,9 +20,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static it.uniroma3.siwbooks.authentication.SecurityUtil.isIsAdmin;
 
 @Controller
 public class LibriController {
@@ -39,6 +40,8 @@ public class LibriController {
     private RecensioneService RecensioneService;
     @Autowired
     private UtenteService userService;
+    @Autowired
+    private BookValidator bookValidator;
 
     @GetMapping("/books")
     public String list(
@@ -108,15 +111,15 @@ public class LibriController {
                 .body(data);
     }
 
-    @GetMapping("/admin/book/add")
+    @GetMapping("/book/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("authors", autoreService.findAll()); // List<Author>
         model.addAttribute("genres", genereService.findAll());   // List<Genre>
         model.addAttribute("book", new Books());
         return "FormBook"; // oppure il nome effettivo del file Thymeleaf
     }
-
-    @PostMapping("/admin/book/add")
+/*
+    @PostMapping("/book/add")
     public String addBook(@ModelAttribute("book") Books book,
                           @RequestParam("authors") List<Long> authors,
                           @RequestParam("genres") List<Long> genres,
@@ -124,10 +127,29 @@ public class LibriController {
                           RedirectAttributes redirectAttributes,
                           BindingResult bindingResult,
                           Model model) {
+        bookValidator.validate(book, bindingResult);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("authors", autoreService.findAll());
+            model.addAttribute("genres", genereService.findAll());
+            model.addAttribute("book", book);
+            return "FormBook";
+        } else if (isIsAdmin()) {
+            List<Autore> selectedAuthors = new ArrayList<>();
+            if (!authors.isEmpty()) {
+                selectedAuthors = authors.stream()
+                        .map(id -> autoreService.findById(id))
+                        .collect(Collectors.toList());
+            }
+
+            bookService.registerBook(book, Images, selectedAuthors);
+
+            redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
+            return "redirect:/book/" + book.getId();
+        }
         return "redirect:/book";
     }
 
-
+*/
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
             case "DATE_ASC"   -> Sort.by("releaseDate").ascending();

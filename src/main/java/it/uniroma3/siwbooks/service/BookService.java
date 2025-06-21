@@ -1,5 +1,6 @@
 package it.uniroma3.siwbooks.service;
 
+import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.models.Recensione;
 import it.uniroma3.siwbooks.repository.BookRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -155,7 +157,7 @@ public class BookService {
         return bookRepository.findById(id).orElse(null);
     }
 
-    public boolean bookExistsByNameAndPublicationYear(String title, Integer publicationYear) {
+    public boolean bookExistsByNameAndPublicationYear(String title, LocalDateTime publicationYear) {
         List<Books> books = bookRepository.searchByTitleIgnoringSpaces(title);
         for (Books book : books) {
             if (book.getReleaseDate().equals(publicationYear)) {
@@ -163,5 +165,8 @@ public class BookService {
             }
         }
         return false;
+    }
+
+    public void registerBook(Books book, MultipartFile[] images, List<Autore> selectedAuthors) {
     }
 }
