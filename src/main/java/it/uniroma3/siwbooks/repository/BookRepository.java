@@ -65,4 +65,7 @@ public interface BookRepository extends CrudRepository<Books, Long> {
     @Query("SELECT COUNT(DISTINCT b), AVG(r.stelle), MAX(b.releaseDate), MIN(b.releaseDate) FROM Books b JOIN b.recensioni r")
     Object[] getBookStatistics();
 
+    @Query("SELECT b FROM Books b WHERE LOWER(REPLACE(b.title, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:title, ' ', ''), '%'))")
+    List<Books> searchByTitleIgnoringSpaces(@Param("title") String title);
+
 }

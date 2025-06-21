@@ -154,4 +154,14 @@ public class BookService {
     public Books findById(Long id) {
         return bookRepository.findById(id).orElse(null);
     }
+
+    public boolean bookExistsByNameAndPublicationYear(String title, Integer publicationYear) {
+        List<Books> books = bookRepository.searchByTitleIgnoringSpaces(title);
+        for (Books book : books) {
+            if (book.getReleaseDate().equals(publicationYear)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

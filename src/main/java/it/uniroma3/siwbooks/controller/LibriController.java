@@ -15,12 +15,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -108,11 +108,23 @@ public class LibriController {
                 .body(data);
     }
 
-    @GetMapping("/book/add")
+    @GetMapping("/admin/book/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("authors", autoreService.findAll()); // List<Author>
         model.addAttribute("genres", genereService.findAll());   // List<Genre>
+        model.addAttribute("book", new Books());
         return "FormBook"; // oppure il nome effettivo del file Thymeleaf
+    }
+
+    @PostMapping("/admin/book/add")
+    public String addBook(@ModelAttribute("book") Books book,
+                          @RequestParam("authors") List<Long> authors,
+                          @RequestParam("genres") List<Long> genres,
+                          @RequestParam("images") MultipartFile[] Images,
+                          RedirectAttributes redirectAttributes,
+                          BindingResult bindingResult,
+                          Model model) {
+        return "redirect:/book";
     }
 
 
