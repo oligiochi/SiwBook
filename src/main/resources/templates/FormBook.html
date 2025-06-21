@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aggiungi Libro</title>
+  <link rel="stylesheet" href="/css/FormBook.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="warped_box_for_card">
+  <div class="book-form-card">
+    <div class="icon-container">
+      <div class="book-icon">
+        <i class="fas fa-book"></i>
+      </div>
+    </div>
+
+    <div class="title-section">
+      <h1>Aggiungi Libro</h1>
+      <p class="subtitle">Compila tutti i campi per inserire un nuovo libro nel catalogo</p>
+    </div>
+
+    <form id="bookForm">
+      <!-- Titolo del libro -->
+      <div class="form-group">
+        <label for="bookTitle">Titolo del Libro *</label>
+        <input type="text" id="bookTitle" class="input" placeholder="Inserisci il titolo del libro" required>
+        <div class="character-count"><span id="titleCount">0</span>/120 caratteri</div>
+       <!-- <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>-->
+      </div>
+
+      <!-- Autori -->
+      <div class="form-group">
+        <label for="authorInput">Autore/i *</label>
+        <div class="multi-select-container">
+          <div class="selected-items" id="selectedAuthors">
+            <!-- Selected authors will appear here -->
+          </div>
+          <input type="text" id="authorInput" class="input" placeholder="Cerca o aggiungi un autore...">
+          <div class="dropdown" id="authorDropdown">
+            <div class="dropdown-item" th:each="author : ${authors}"
+                 th:data-id="${author.id}" th:text="${author.nome}+' '+${author.cognome}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generi -->
+      <div class="form-group">
+        <label for="genreInput">Generi *</label>
+        <div class="multi-select-container">
+          <div class="selected-items" id="selectedGenres">
+            <!-- Selected genres will appear here -->
+          </div>
+          <input type="text" id="genreInput" class="input" placeholder="Cerca o aggiungi un genere...">
+          <div class="dropdown" id="genreDropdown">
+            <div class="dropdown-item" th:each="genre : ${genres}"
+                 th:data-id="${genre.id}" th:text="${genre.genere}">
+            </div>
+        </div>
+      </div>
+
+      <!-- Data di pubblicazione -->
+      <div class="form-group">
+        <label for="releaseDate">Data di Pubblicazione *</label>
+        <div class="date-picker">
+          <input type="date" id="releaseDate" class="input" required>
+        </div>
+      </div>
+
+      <!-- Upload immagini -->
+      <div class="form-group">
+        <label>Copertina e Immagini</label>
+        <div class="image-upload-container" id="dropArea">
+          <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+          <button type="button" id="uploadTrigger" class="btn submit-btn" style="max-width: 200px; margin: 0 auto;">
+            <i class="fas fa-cloud-upload-alt"></i> Scegli Immagini
+          </button>
+          <p style="margin-top: 10px; color: #7f8c8d;">Trascina le immagini qui o clicca per selezionare</p>
+          <div class="image-preview-container" id="imagePreview">
+            <!-- Image previews will appear here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottoni di invio -->
+      <div class="btn-container">
+        <button type="submit" class="btn submit-btn">
+          <i class="fas fa-save"></i> Salva Libro
+        </button>
+        <button type="reset" class="btn reset-btn">
+          <i class="fas fa-undo"></i> Azzera
+        </button>
+      </div>
+    </form>
+
+    <div class="success-message" id="successMessage">
+      <i class="fas fa-check-circle"></i> Libro aggiunto con successo!
+    </div>
+  </div>
+</div>
+
+<script src="/js/FormBook.js"></script>
+</body>
+</html>

@@ -108,6 +108,14 @@ public class LibriController {
                 .body(data);
     }
 
+    @GetMapping("/book/add")
+    public String showAddBookForm(Model model) {
+        model.addAttribute("authors", autoreService.findAll()); // List<Author>
+        model.addAttribute("genres", genereService.findAll());   // List<Genre>
+        return "FormBook"; // oppure il nome effettivo del file Thymeleaf
+    }
+
+
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
             case "DATE_ASC"   -> Sort.by("releaseDate").ascending();
