@@ -133,6 +133,7 @@ class ReviewController {
     @GetMapping("/book/{book_id}/UpdateReview/{review_id}")
     public String updateReview(@PathVariable("book_id") Long bookId,
                                @PathVariable("review_id") Long reviewId,
+                               RedirectAttributes redirectAttributes,
                                Model model) {
         Recensione review = reviewService.findById(reviewId);
         Books book = bookService.findById(bookId);
@@ -141,8 +142,8 @@ class ReviewController {
             model.addAttribute("formAction", "/book/" + book.getId() + "/UpdateReview/" + review.getId());
             return "recensioniForm";
         }
-        model.addAttribute("message", "Non puoi modificare questa recensione.");
-        return "customError";
+        redirectAttributes.addFlashAttribute("error", "Non puoi modificare questa recensione.");
+        return "redirect:/book/" + bookId;
     }
     @PostMapping("/book/{book_id}/UpdateReview/{review_id}")
     public String updateReview(@PathVariable("book_id") Long bookId,
@@ -175,8 +176,8 @@ class ReviewController {
             recensioneService.UpgradeRecensione(reviewService.findById(reviewId),review.getStelle(),review.getCommento(),review.getTitolo());
             return "redirect:/book/" + bookId;
         }else {
-            model.addAttribute("message", "Non puoi modificare questa recensione.");
-            return "customError";
+            redirectAttributes.addFlashAttribute("error", "Non puoi modificare questa recensione.");
         }
+        return "redirect:/book/" + bookId;
     }
 }

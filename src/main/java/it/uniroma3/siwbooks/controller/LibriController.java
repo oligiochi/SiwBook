@@ -126,7 +126,7 @@ public class LibriController {
 
                           @RequestParam(value = "releaseDate", required = false)
                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                              LocalDateTime releaseDateParam,
+                              LocalDate releaseDateParam,
 
                           @RequestParam(value = "images", required = false)
                               MultipartFile[] imagesParam,
@@ -139,6 +139,53 @@ public class LibriController {
 
                           RedirectAttributes redirectAttributes,
                           Model model) {
+
+        // Valida il book (senza images e releaseDate automatici)
+        bookValidator.validate(book, bindingResult);
+
+        if (bindingResult.hasErrors() && false) {
+            model.addAttribute("authors", autoreService.findAll());
+            model.addAttribute("genres", genereService.findAll());
+            model.addAttribute("book", book);
+            List<String> errorMessages = new ArrayList<>();
+
+// 1. Errori di campo, con nome del campo
+            bindingResult.getFieldErrors().forEach(fe -> {
+                String field = fe.getField();
+                String msg   = fe.getDefaultMessage();
+                errorMessages.add(String.format("%s: %s", field, msg));
+            });
+
+// 2. Errori globali (ObjectError)
+            bindingResult.getGlobalErrors().forEach(oe -> {
+                errorMessages.add(oe.getDefaultMessage());
+            });
+
+            model.addAttribute("errors", errorMessages);
+            return "FormBook";
+        } else if (!isIsAdmin()) {
+            redirectAttributes.addFlashAttribute("error", "Non puoi Creare un libro. Solo admin!");
+        }
+        // Imposta releaseDate manualmente
+        book.setReleaseDate(releaseDateParam.atStartOfDay());
+        List<Autore> selectedAuthors = new ArrayList<>();
+        if (authorsCsv != null && !authorsCsv.isBlank()) {
+            selectedAuthors = Arrays.stream(authorsCsv.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .map(autoreService::findById)
+                    .toList();
+        }
+        List<Genere> selectedGenres = new ArrayList<>();
+        if (genresCsv != null && !genresCsv.isBlank()) {
+            selectedGenres=Arrays.stream(genresCsv.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .map(genereService::findById)
+                    .toList();
+        }
+
+
         System.out.println("authorsCsv: " + authorsCsv);
         System.out.println("genresCsv: " + genresCsv);
         System.out.println("releaseDateParam: " + releaseDateParam);
@@ -182,28 +229,9 @@ public class LibriController {
 }
 /*
 
-        // Imposta releaseDate manualmente
-        book.setReleaseDate(releaseDateParam.atStartOfDay());
 
-        // Valida il book (senza images e releaseDate automatici)
-        bookValidator.validate(book, bindingResult);
 
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("authors", autoreService.findAll());
-            model.addAttribute("genres", genereService.findAll());
-            model.addAttribute("book", book);
-            return "FormBook";
-        }
 
-        if (isIsAdmin()) {
-            List<Autore> selectedAuthors = new ArrayList<>();
-            if (authorsCsv != null && !authorsCsv.isBlank()) {
-                selectedAuthors = Arrays.stream(authorsCsv.split(","))
-                        .map(String::trim)
-                        .map(Long::parseLong)
-                        .map(autoreService::findById)
-                        .collect(Collectors.toList());
-            }
 
             // Ora puoi usare releaseDate e images come vuoi
             bookService.registerBook(book, imagesParam, selectedAuthors);

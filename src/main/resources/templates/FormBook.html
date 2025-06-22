@@ -72,7 +72,7 @@
       <div class="form-group">
         <label for="releaseDate">Data di Pubblicazione *</label>
         <div class="date-picker">
-          <input type="datetime-local" id="releaseDate" name="releaseDate" class="input" required>
+          <input type="date" id="releaseDate" name="releaseDate" class="input" required>
         </div>
       </div>
 
@@ -101,7 +101,11 @@
         </button>
       </div>
     </form>
-
+    <div th:if="${errors}">
+      <ul class="alert alert-danger">
+        <li th:each="err : ${errors}" th:text="${err}"></li>
+      </ul>
+    </div>
     <div class="success-message" id="successMessage">
       <i class="fas fa-check-circle"></i> Libro aggiunto con successo!
     </div>
