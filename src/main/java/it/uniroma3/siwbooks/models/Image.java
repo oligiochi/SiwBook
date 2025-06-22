@@ -12,6 +12,16 @@ public class Image {
     @Column(columnDefinition = "bytea")
     private byte[] data;
 
+    private String imageType;
+
+    public String getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
+    }
+
     public Long getId() {
         return id;
     }

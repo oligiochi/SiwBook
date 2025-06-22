@@ -136,16 +136,5 @@ document.addEventListener('DOMContentLoaded', function() {
         imageFiles = [];
         titleCount.textContent = '0';
     });
-    bookForm.addEventListener('submit', e => {
-        e.preventDefault();
-        successMessage.style.display = 'block';
-        setTimeout(() => {
-            successMessage.style.display = 'none';
-            bookForm.reset();
-        }, 3000);
-    });
 
-    // Imposta oggi come default
-    document.getElementById('releaseDate').value =
-        new Date().toISOString().split('T')[0];
 });

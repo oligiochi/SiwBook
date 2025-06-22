@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,38 +119,34 @@ public class LibriController {
         model.addAttribute("book", new Books());
         return "FormBook"; // oppure il nome effettivo del file Thymeleaf
     }
-/*
+
     @PostMapping("/book/add")
     public String addBook(@ModelAttribute("book") Books book,
-                          @RequestParam("authors") List<Long> authors,
-                          @RequestParam("genres") List<Long> genres,
-                          @RequestParam("images") MultipartFile[] Images,
+                          BindingResult bindingResult,                                // ← DEVE STARE SUBITO DOPO book
+
+                          @RequestParam(value = "releaseDate", required = false)
+                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                              LocalDateTime releaseDateParam,
+
+                          @RequestParam(value = "images", required = false)
+                              MultipartFile[] imagesParam,
+
+                          @RequestParam(value = "authors", required = false)
+                              String authorsCsv,
+
+                          @RequestParam(value = "genres", required = false)
+                              String genresCsv,
+
                           RedirectAttributes redirectAttributes,
-                          BindingResult bindingResult,
                           Model model) {
-        bookValidator.validate(book, bindingResult);
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("authors", autoreService.findAll());
-            model.addAttribute("genres", genereService.findAll());
-            model.addAttribute("book", book);
-            return "FormBook";
-        } else if (isIsAdmin()) {
-            List<Autore> selectedAuthors = new ArrayList<>();
-            if (!authors.isEmpty()) {
-                selectedAuthors = authors.stream()
-                        .map(id -> autoreService.findById(id))
-                        .collect(Collectors.toList());
-            }
+        System.out.println("authorsCsv: " + authorsCsv);
+        System.out.println("genresCsv: " + genresCsv);
+        System.out.println("releaseDateParam: " + releaseDateParam);
 
-            bookService.registerBook(book, Images, selectedAuthors);
-
-            redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
-            return "redirect:/book/" + book.getId();
-        }
-        return "redirect:/book";
+        return "redirect:/";
     }
 
-*/
+
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
             case "DATE_ASC"   -> Sort.by("releaseDate").ascending();
@@ -183,3 +180,37 @@ public class LibriController {
                 .collect(Collectors.toList());
     }
 }
+/*
+
+        // Imposta releaseDate manualmente
+        book.setReleaseDate(releaseDateParam.atStartOfDay());
+
+        // Valida il book (senza images e releaseDate automatici)
+        bookValidator.validate(book, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("authors", autoreService.findAll());
+            model.addAttribute("genres", genereService.findAll());
+            model.addAttribute("book", book);
+            return "FormBook";
+        }
+
+        if (isIsAdmin()) {
+            List<Autore> selectedAuthors = new ArrayList<>();
+            if (authorsCsv != null && !authorsCsv.isBlank()) {
+                selectedAuthors = Arrays.stream(authorsCsv.split(","))
+                        .map(String::trim)
+                        .map(Long::parseLong)
+                        .map(autoreService::findById)
+                        .collect(Collectors.toList());
+            }
+
+            // Ora puoi usare releaseDate e images come vuoi
+            bookService.registerBook(book, imagesParam, selectedAuthors);
+
+            redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
+            return "redirect:/book/" + book.getId();
+        }
+
+        return "redirect:/book";
+ */

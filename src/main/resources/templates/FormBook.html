@@ -21,7 +21,7 @@
       <p class="subtitle">Compila tutti i campi per inserire un nuovo libro nel catalogo</p>
     </div>
 
-    <form id="bookForm" th:action="@{/books/add}" method="post" enctype="multipart/form-data">
+    <form id="bookForm" th:action="@{/book/add}" method="post" enctype="multipart/form-data">
 
       <!-- Titolo del libro -->
       <div class="form-group">
@@ -72,7 +72,7 @@
       <div class="form-group">
         <label for="releaseDate">Data di Pubblicazione *</label>
         <div class="date-picker">
-          <input type="date" id="releaseDate" name="releaseDate" class="input" required>
+          <input type="datetime-local" id="releaseDate" name="releaseDate" class="input" required>
         </div>
       </div>
 
@@ -94,7 +94,7 @@
       <!-- Bottoni di invio -->
       <div class="btn-container">
         <button type="submit" class="btn submit-btn">
-          <i class="fas fa-save"></i> Salva Libro
+          <i class="fas fa-paper-plane"></i> Salva Libro
         </button>
         <button type="reset" class="btn reset-btn">
           <i class="fas fa-undo"></i> Azzera

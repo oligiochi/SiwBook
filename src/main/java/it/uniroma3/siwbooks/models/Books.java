@@ -4,6 +4,7 @@ package it.uniroma3.siwbooks.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 @Entity
@@ -22,10 +23,10 @@ public class Books {
     private LocalDateTime releaseDate;
     @Lob
     private byte[] pdf;
-    @OneToMany
-    private List<Image> images;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "book_id")
+    private List<Image> images = new ArrayList<>();
 
-    private String imageType; // es. "image/jpeg"
     @OneToMany(mappedBy = "libro", cascade = CascadeType.REMOVE)
     private List<Recensione> recensioni;
 
@@ -35,14 +36,6 @@ public class Books {
 
     public void setGeneri(List<Genere> generi) {
         this.generi = generi;
-    }
-
-    public String getImageType() {
-        return imageType;
-    }
-
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
     }
 
     public List<Recensione> getRecensioni() {
