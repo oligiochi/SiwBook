@@ -19,8 +19,12 @@ public class Image {
     @Column(name = "original_file_name", nullable = false)
     private String originalFileName;
 
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
+    /*@Lob
+    @Column(name = "data", nullable = false)
+    private byte[] data;*/
+    @Lob
+    @Column(name = "data")
+    private byte[] data;
 
     @Column(name = "file_size")
     private Long fileSize;
@@ -35,29 +39,17 @@ public class Image {
     @JoinColumn(name = "book_id")
     private Books book;
 
-    @Column(columnDefinition = "bytea")
-    private byte[] data;
+    // Constructors
+    public Image() {}
 
-    public Image(String fileName, String originalFileName, String filePath,
+    public Image(String fileName, String originalFileName, byte[] data,
                  Long fileSize, String contentType) {
         this.fileName = fileName;
         this.originalFileName = originalFileName;
-        this.filePath = filePath;
+        this.data = data;
         this.fileSize = fileSize;
         this.contentType = contentType;
         this.uploadDate = LocalDateTime.now();
-    }
-
-    public Image() {
-
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
     }
 
     // Getters and Setters
@@ -85,12 +77,12 @@ public class Image {
         this.originalFileName = originalFileName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public byte[] getData() {
+        return data;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setData(byte[] data) {
+        this.data = data;
     }
 
     public Long getFileSize() {

@@ -7,25 +7,17 @@ import java.util.Set;
 
 import it.uniroma3.siwbooks.models.Image;
 import it.uniroma3.siwbooks.repository.ImageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class ImageService {
 
-    private static final String UPLOAD_DIR = "uploads/images/";
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
 
@@ -39,24 +31,14 @@ public class ImageService {
         // Validazioni
         validateFile(file);
 
-        // Genera nome file unico
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = getFileExtension(originalFilename).toLowerCase();
-        String uniqueFilename = generateUniqueFilename() + "." + fileExtension;
-
-        // Crea directory se non esiste
-        createUploadDirectoryIfNotExists();
-
-        // Salva il file fisicamente
-        String filePath = UPLOAD_DIR + uniqueFilename;
-        Path destinationPath = Paths.get(filePath);
-        Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        // Legge i dati del file come byte array
+        byte[] imageData = file.getBytes();
 
         // Crea e salva l'entità Image
         Image image = new Image();
-        image.setFileName(uniqueFilename);
-        image.setOriginalFileName(originalFilename);
-        image.setFilePath(filePath);
+        image.setFileName(generateUniqueFilename(file.getOriginalFilename()));
+        image.setOriginalFileName(file.getOriginalFilename());
+        image.setData(imageData);
         image.setFileSize(file.getSize());
         image.setContentType(file.getContentType());
         image.setUploadDate(LocalDateTime.now());
@@ -106,36 +88,21 @@ public class ImageService {
     /**
      * Genera un nome file unico usando timestamp e UUID
      */
-    private String generateUniqueFilename() {
+    private String generateUniqueFilename(String originalFilename) {
+        String extension = getFileExtension(originalFilename).toLowerCase();
         long timestamp = System.currentTimeMillis();
         String uuid = UUID.randomUUID().toString().substring(0, 8);
-        return timestamp + "_" + uuid;
+        return timestamp + "_" + uuid + "." + extension;
     }
 
     /**
-     * Crea la directory di upload se non esiste
+     * Elimina un'immagine dal database
      */
-    private void createUploadDirectoryIfNotExists() throws IOException {
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-    }
-
-    /**
-     * Elimina un'immagine (file e record dal database)
-     */
-    public void deleteImage(Long imageId) throws IOException {
+    public void deleteImage(Long imageId) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Immagine non trovata"));
 
-        // Elimina il file fisico
-        Path filePath = Paths.get(image.getFilePath());
-        if (Files.exists(filePath)) {
-            Files.delete(filePath);
-        }
-
-        // Elimina il record dal database
+        // Elimina solo il record dal database (non c'è più file fisico)
         imageRepository.delete(image);
     }
 
@@ -150,15 +117,9 @@ public class ImageService {
     /**
      * Ottiene il contenuto di un'immagine come byte array
      */
-    public byte[] getImageContent(Long imageId) throws IOException {
+    public byte[] getImageContent(Long imageId) {
         Image image = findById(imageId);
-        Path filePath = Paths.get(image.getFilePath());
-
-        if (!Files.exists(filePath)) {
-            throw new IOException("File immagine non trovato: " + image.getFilePath());
-        }
-
-        return Files.readAllBytes(filePath);
+        return image.getData();
     }
 
     /**

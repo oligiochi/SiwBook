@@ -6,10 +6,12 @@ import it.uniroma3.siwbooks.dto.GenreDto;
 import it.uniroma3.siwbooks.models.*;
 import it.uniroma3.siwbooks.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -112,14 +114,26 @@ public class LibriController {
     @GetMapping("/book/{id}/cover")
     public ResponseEntity<byte[]> getBookCover(@PathVariable Long id) {
         Books book = bookService.findById(id);
-        if (book == null || book.getCoverImage() == null) {
-            return ResponseEntity.notFound().build();
+        Image cover = (book != null) ? book.getCoverImage() : null;
+
+        if (cover == null || cover.getData() == null) {
+            try {
+                ClassPathResource placeholder = new ClassPathResource("static/images/book_cover_placeholder2.png");
+                byte[] data = placeholder.getInputStream().readAllBytes();
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(data);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
         }
-        byte[] data = book.getCoverImage().getData();
+
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG) // o rileva dinamicamente
-                .body(data);
+                .contentType(MediaType.parseMediaType(cover.getContentType()))
+                .body(cover.getData());
     }
+
+
 
     @GetMapping("/book/add")
     public String showAddBookForm(Model model) {

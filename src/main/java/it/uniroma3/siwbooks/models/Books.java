@@ -88,7 +88,7 @@ public class Books {
 
     public Image getCoverImage(){
         if(this.images == null || this.images.isEmpty()) return null;
-        return this.images.get(0);
+        return this.images.getFirst();
     }
     public List<Image> getImages() {
         return images;
