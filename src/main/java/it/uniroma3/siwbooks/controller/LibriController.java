@@ -110,31 +110,6 @@ public class LibriController {
         return "book";
     }
 
-
-    @GetMapping("/book/{id}/cover")
-    public ResponseEntity<byte[]> getBookCover(@PathVariable Long id) {
-        Books book = bookService.findById(id);
-        Image cover = (book != null) ? book.getCoverImage() : null;
-
-        if (cover == null || cover.getData() == null) {
-            try {
-                ClassPathResource placeholder = new ClassPathResource("static/images/book_cover_placeholder2.png");
-                byte[] data = placeholder.getInputStream().readAllBytes();
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_PNG)
-                        .body(data);
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(cover.getContentType()))
-                .body(cover.getData());
-    }
-
-
-
     @GetMapping("/book/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("authors", autoreService.findAll()); // List<Author>

@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()).cors(cors->cors.disable())
                 .authorizeHttpRequests(requests -> requests
                         // pagine e risorse su cui tutti possono fare GET
-                        .requestMatchers(HttpMethod.GET,"/","/login","/register","/index","/author/**","/authors","/search","/book/**","/books","/css/**", "/images/**", "favicon.ico","/js/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/","/login","/register","/index","/author/**","/authors","/search","/book/**","/books","/css/**", "/images/**", "favicon.ico","/js/**","/images/**").permitAll()
                         // pagine e risorse su cui tutti possono fare POST
                         .requestMatchers(HttpMethod.POST,"/search","/register","/login").permitAll()
 
