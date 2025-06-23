@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,13 @@ public class LibriController {
     private UtenteService userService;
     @Autowired
     private BookValidator bookValidator;
+    @Autowired
+    private ImageService imageService;
+
+    @InitBinder("book")
+    public void initBinder(WebDataBinder binder) {
+        binder.setDisallowedFields("releaseDate", "images", "author", "generi");
+    }
 
     @GetMapping("/books")
     public String list(
@@ -122,73 +131,101 @@ public class LibriController {
 
     @PostMapping("/book/add")
     public String addBook(@ModelAttribute("book") Books book,
-                          BindingResult bindingResult,                                // ← DEVE STARE SUBITO DOPO book
+                          BindingResult bindingResult,
 
-                          @RequestParam(value = "releaseDate", required = false)
-                              @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                              LocalDate releaseDateParam,
-
-                          @RequestParam(value = "images", required = false)
-                              MultipartFile[] imagesParam,
-
-                          @RequestParam(value = "authors", required = false)
-                              String authorsCsv,
-
-                          @RequestParam(value = "genres", required = false)
-                              String genresCsv,
+                          @RequestParam(value = "releaseDate", required = false) String releaseDateString,
+                          @RequestParam(value = "images", required = false) MultipartFile[] imagesParam,
+                          @RequestParam(value = "author", required = false) String authorsCsv,
+                          @RequestParam(value = "generi", required = false) String genresCsv,
 
                           RedirectAttributes redirectAttributes,
                           Model model) {
 
-        // Valida il book (senza images e releaseDate automatici)
+        // Gestione manuale di releaseDate
+        if (releaseDateString != null && !releaseDateString.isBlank()) {
+            try {
+                LocalDate date = LocalDate.parse(releaseDateString);
+                book.setReleaseDate(date.atStartOfDay());
+            } catch (DateTimeParseException e) {
+                bindingResult.rejectValue("releaseDate", "error.date", "Formato data non valido");
+            }
+        } else {
+            bindingResult.rejectValue("releaseDate", "error.required", "Data di pubblicazione obbligatoria");
+        }
+
+        // Gestione manuale degli autori
+        List<Autore> selectedAuthors = new ArrayList<>();
+        if (authorsCsv != null && !authorsCsv.isBlank()) {
+            try {
+                selectedAuthors = Arrays.stream(authorsCsv.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Long::parseLong)
+                        .map(autoreService::findById)
+                        .collect(Collectors.toList());
+                book.setAuthor(selectedAuthors);
+            } catch (NumberFormatException e) {
+                bindingResult.rejectValue("author", "error.format", "Formato autori non valido");
+            }
+        } else {
+            bindingResult.rejectValue("author", "error.required", "Almeno un autore è obbligatorio");
+        }
+
+        // Gestione manuale dei generi
+        List<Genere> selectedGenres = new ArrayList<>();
+        if (genresCsv != null && !genresCsv.isBlank()) {
+            try {
+                selectedGenres = Arrays.stream(genresCsv.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Long::parseLong)
+                        .map(genereService::findById)
+                        .collect(Collectors.toList());
+                book.setGeneri(selectedGenres);
+            } catch (NumberFormatException e) {
+                bindingResult.rejectValue("generi", "error.format", "Formato generi non valido");
+            }
+        } else {
+            bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
+        }
+
+        // Gestione manuale delle immagini
+        List<Image> images = new ArrayList<>();
+        if (imagesParam != null && imagesParam.length > 0) {
+            for (MultipartFile file : imagesParam) {
+                if (!file.isEmpty()) {
+                    try {
+                        // Qui devi implementare la logica per salvare l'immagine
+                        // e creare l'oggetto Image
+                        Image image = imageService.createImage(file);
+                        images.add(image);
+                    } catch (Exception e) {
+                        bindingResult.rejectValue("images", "error.upload", "Errore nel caricamento delle immagini");
+                        break;
+                    }
+                }
+            }
+        }
+        book.setImages(images);
+
+        // Valida il book solo sui campi che non gestisci manualmente
         bookValidator.validate(book, bindingResult);
 
-        if (bindingResult.hasErrors() && false) {
+        if (bindingResult.hasErrors()) {
             model.addAttribute("authors", autoreService.findAll());
             model.addAttribute("genres", genereService.findAll());
             model.addAttribute("book", book);
-            List<String> errorMessages = new ArrayList<>();
-
-// 1. Errori di campo, con nome del campo
-            bindingResult.getFieldErrors().forEach(fe -> {
-                String field = fe.getField();
-                String msg   = fe.getDefaultMessage();
-                errorMessages.add(String.format("%s: %s", field, msg));
-            });
-
-// 2. Errori globali (ObjectError)
-            bindingResult.getGlobalErrors().forEach(oe -> {
-                errorMessages.add(oe.getDefaultMessage());
-            });
-
-            model.addAttribute("errors", errorMessages);
             return "FormBook";
-        } else if (!isIsAdmin()) {
+        }
+
+        if (!isIsAdmin() && false) {
             redirectAttributes.addFlashAttribute("error", "Non puoi Creare un libro. Solo admin!");
-        }
-        // Imposta releaseDate manualmente
-        book.setReleaseDate(releaseDateParam.atStartOfDay());
-        List<Autore> selectedAuthors = new ArrayList<>();
-        if (authorsCsv != null && !authorsCsv.isBlank()) {
-            selectedAuthors = Arrays.stream(authorsCsv.split(","))
-                    .map(String::trim)
-                    .map(Long::parseLong)
-                    .map(autoreService::findById)
-                    .toList();
-        }
-        List<Genere> selectedGenres = new ArrayList<>();
-        if (genresCsv != null && !genresCsv.isBlank()) {
-            selectedGenres=Arrays.stream(genresCsv.split(","))
-                    .map(String::trim)
-                    .map(Long::parseLong)
-                    .map(genereService::findById)
-                    .toList();
+            return "redirect:/";
         }
 
-
-        System.out.println("authorsCsv: " + authorsCsv);
-        System.out.println("genresCsv: " + genresCsv);
-        System.out.println("releaseDateParam: " + releaseDateParam);
+        // Salva il libro
+        bookService.save(book);
+        redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
 
         return "redirect:/";
     }

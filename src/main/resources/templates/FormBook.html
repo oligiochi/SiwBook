@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Aggiungi Libro</title>
-  <link rel="stylesheet" href="/css/FormBook.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/FormBook.css" />
+  <link rel="stylesheet" href="/css/errors.css" />
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
 </head>
 <body>
 <div class="warped_box_for_card">
@@ -18,78 +22,151 @@
 
     <div class="title-section">
       <h1>Aggiungi Libro</h1>
-      <p class="subtitle">Compila tutti i campi per inserire un nuovo libro nel catalogo</p>
+      <p class="subtitle">
+        Compila tutti i campi per inserire un nuovo libro nel catalogo
+      </p>
     </div>
 
-    <form id="bookForm" th:action="@{/book/add}" method="post" enctype="multipart/form-data">
+    <!-- Binding al model attribute "book" -->
+    <form
+            th:action="@{/book/add}"
+            th:object="${book}"
+            method="post"
+            enctype="multipart/form-data"
+    >
+      <!-- Errori globali -->
+      <div
+              th:if="${#fields.hasGlobalErrors()}"
+              class="alert alert-danger"
+      >
+        <ul>
+          <li
+                  th:each="err : ${#fields.globalErrors()}"
+                  th:text="${err}"
+          ></li>
+        </ul>
+      </div>
 
       <!-- Titolo del libro -->
-      <div class="form-group">
+      <div
+              class="form-group input-icon"
+              th:classappend="${#fields.hasErrors('title')} ? ' error'"
+      >
         <label for="bookTitle">Titolo del Libro *</label>
-        <input type="text" id="bookTitle" name="title" class="input" placeholder="Inserisci il titolo del libro" required>
-        <div class="character-count"><span id="titleCount">0</span>/120 caratteri</div>
+        <input
+                th:field="*{title}"
+                id="bookTitle"
+                class="input"
+                placeholder="Inserisci il titolo del libro"
+                required
+                th:classappend="${#fields.hasErrors('title')} ? ' input-error'"
+        />
+        <div class="error-message" th:errors="*{title}"></div>
+        <div class="character-count">
+          <span id="titleCount">0</span>/120 caratteri
+        </div>
       </div>
 
       <!-- Autori -->
-      <div class="form-group">
+      <div
+              class="form-group multi-select-container input-icon"
+              th:classappend="${#fields.hasErrors('author')} ? ' error'"
+      >
         <label for="authorInput">Autore/i *</label>
-        <div class="multi-select-container">
-          <div class="selected-items" id="selectedAuthors">
-            <!-- Selected authors will appear here -->
-          </div>
-          <!-- hidden field for authors list -->
-          <input type="hidden" id="authorsField" name="authors" value="">
-
-          <input type="text" id="authorInput" class="input" placeholder="Cerca o aggiungi un autore...">
-          <div class="dropdown" id="authorDropdown">
-            <div class="dropdown-item" th:each="author : ${authors}"
-                 th:data-id="${author.id}" th:text="${author.nome} + ' ' + ${author.cognome}">
-            </div>
-          </div>
+        <div class="selected-items" id="selectedAuthors"></div>
+        <input type="hidden" id="authorsField" th:field="*{author}" />
+        <input
+                type="text"
+                id="authorInput"
+                class="input"
+                placeholder="Cerca o aggiungi un autore..."
+                autocomplete="off"
+                th:classappend="${#fields.hasErrors('author')} ? ' input-error'"
+        />
+        <div class="dropdown" id="authorDropdown">
+          <div
+                  class="dropdown-item"
+                  th:each="author : ${authors}"
+                  th:data-id="${author.id}"
+                  th:text="${author.nome} + ' ' + ${author.cognome}"
+          ></div>
         </div>
+        <div class="error-message" th:errors="*{author}"></div>
       </div>
 
       <!-- Generi -->
-      <div class="form-group">
+      <div
+              class="form-group multi-select-container input-icon"
+              th:classappend="${#fields.hasErrors('generi')} ? ' error'"
+      >
         <label for="genreInput">Generi *</label>
-        <div class="multi-select-container">
-          <div class="selected-items" id="selectedGenres">
-            <!-- Selected genres will appear here -->
-          </div>
-          <!-- hidden field for genres list -->
-          <input type="hidden" id="genresField" name="genres" value="">
-
-          <input type="text" id="genreInput" class="input" placeholder="Cerca o aggiungi un genere...">
-          <div class="dropdown" id="genreDropdown">
-            <div class="dropdown-item" th:each="genre : ${genres}"
-                 th:data-id="${genre.id}" th:text="${genre.genere}">
-            </div>
-          </div>
+        <div class="selected-items" id="selectedGenres"></div>
+        <input type="hidden" id="genresField" th:field="*{generi}" />
+        <input
+                type="text"
+                id="genreInput"
+                class="input"
+                placeholder="Cerca o aggiungi un genere..."
+                autocomplete="off"
+                th:classappend="${#fields.hasErrors('generi')} ? ' input-error'"
+        />
+        <div class="dropdown" id="genreDropdown">
+          <div
+                  class="dropdown-item"
+                  th:each="genre : ${genres}"
+                  th:data-id="${genre.id}"
+                  th:text="${genre.genere}"
+          ></div>
         </div>
+        <div class="error-message" th:errors="*{generi}"></div>
       </div>
 
       <!-- Data di pubblicazione -->
-      <div class="form-group">
+      <div
+              class="form-group date-picker input-icon"
+              th:classappend="${#fields.hasErrors('releaseDate')} ? ' error'"
+      >
         <label for="releaseDate">Data di Pubblicazione *</label>
-        <div class="date-picker">
-          <input type="date" id="releaseDate" name="releaseDate" class="input" required>
-        </div>
+        <input
+                th:field="*{releaseDate}"
+                type="date"
+                id="releaseDate"
+                class="input"
+                required
+                th:classappend="${#fields.hasErrors('releaseDate')} ? ' input-error'"
+        />
+        <div class="error-message" th:errors="*{releaseDate}"></div>
       </div>
 
       <!-- Upload immagini -->
-      <div class="form-group">
+      <div
+              class="form-group image-upload-container"
+              id="dropArea"
+              th:classappend="${#fields.hasErrors('images')} ? ' error'"
+      >
         <label>Copertina e Immagini</label>
-        <div class="image-upload-container" id="dropArea">
-          <input type="file" id="imageUpload" name="images" accept="image/*" multiple style="display: none;">
-          <button type="button" id="uploadTrigger" class="btn submit-btn" style="max-width: 200px; margin: 0 auto;">
-            <i class="fas fa-cloud-upload-alt"></i> Scegli Immagini
-          </button>
-          <p style="margin-top: 10px; color: #7f8c8d;">Trascina le immagini qui o clicca per selezionare</p>
-          <div class="image-preview-container" id="imagePreview">
-            <!-- Image previews will appear here -->
-          </div>
-        </div>
+        <input
+                th:field="*{images}"
+                type="file"
+                id="imageUpload"
+                accept="image/*"
+                multiple
+                style="display: none;"
+        />
+        <button
+                type="button"
+                id="uploadTrigger"
+                class="btn submit-btn"
+                style="max-width: 200px; margin: 0 auto;"
+        >
+          <i class="fas fa-cloud-upload-alt"></i> Scegli Immagini
+        </button>
+        <p style="margin-top: 10px; color: #7f8c8d;">
+          Trascina le immagini qui o clicca per selezionare
+        </p>
+        <div class="image-preview-container" id="imagePreview"></div>
       </div>
+      <div class="error-message" th:errors="*{images}"></div>
 
       <!-- Bottoni di invio -->
       <div class="btn-container">
@@ -101,14 +178,6 @@
         </button>
       </div>
     </form>
-    <div th:if="${errors}">
-      <ul class="alert alert-danger">
-        <li th:each="err : ${errors}" th:text="${err}"></li>
-      </ul>
-    </div>
-    <div class="success-message" id="successMessage">
-      <i class="fas fa-check-circle"></i> Libro aggiunto con successo!
-    </div>
   </div>
 </div>
 

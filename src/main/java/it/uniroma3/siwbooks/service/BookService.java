@@ -169,4 +169,8 @@ public class BookService {
 
     public void registerBook(Books book, MultipartFile[] images, List<Autore> selectedAuthors) {
     }
+
+    public void save(Books book) {
+        bookRepository.save(book);
+    }
 }
