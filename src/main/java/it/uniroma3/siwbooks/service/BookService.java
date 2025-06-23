@@ -2,6 +2,7 @@ package it.uniroma3.siwbooks.service;
 
 import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
+import it.uniroma3.siwbooks.models.Image;
 import it.uniroma3.siwbooks.models.Recensione;
 import it.uniroma3.siwbooks.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,4 +174,8 @@ public class BookService {
     public void save(Books book) {
         bookRepository.save(book);
     }
+    public List<Long> getImageSummariesForBook(Long bookId) {
+        return bookRepository.findImageIdsByBookId(bookId);
+    }
+
 }

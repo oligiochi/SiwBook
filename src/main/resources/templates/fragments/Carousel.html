@@ -10,17 +10,17 @@
          class="carousel slide book-carousel-container">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img th:src="@{'/book/' + ${book.id} + '/cover'}"
+                <img th:src="@{'/images/book/' + ${book.id} + '/cover'}"
                      class="d-block w-100 h-100 carousel-image"
                      th:alt="'Copertina di ' + ${book.title}"
                      onerror="this.onerror=null;this.src='/images/book_cover_placeholder2.png';">
             </div>
-            <div th:if="${book.getImages()} != null and !${book.getImages().isEmpty()}"
-                 th:each="img, idx : ${book.getImages()}"
+            <div th:if="${imageIds != null and !imageIds.isEmpty()}"
+                 th:each="imgId, idx : ${imageIds}"
                  class="carousel-item">
-                <img th:src="@{'/images/' + ${idx}}"
+                <img th:src="@{'/images/' + ${imgId}}"
                      class="d-block w-100 h-100 carousel-image"
-                     th:alt="'Immagine ' + (${idx} + 1) + ' di ' + ${book.title}"
+                     th:alt="'Immagine ' + (${idx.index} + 1) + ' di ' + ${book.title}"
                      onerror="this.onerror=null;this.src='/images/book_cover_placeholder2.png';">
             </div>
         </div>
@@ -42,11 +42,11 @@
                     data-bs-slide-to="0"
                     class="active"
                     th:aria-label="'Copertina di ' + ${book.title}"></button>
-            <button th:each="img, idx : ${book.getImages()}"
+            <button th:each="imgId, idx : ${imageIds}"
                     type="button"
                     th:attr="data-bs-target='#' + ${carouselId}"
-                    th:data-bs-slide-to="${idx + 1}"
-                    th:aria-label="'Immagine ' + (${idx} + 1)"></button>
+                    th:data-bs-slide-to="${idx.index + 1}"
+                    th:aria-label="'Immagine ' + (${idx.index + 1})"></button>
         </div>
     </div>
 </div>

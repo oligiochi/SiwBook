@@ -90,7 +90,10 @@ public class LibriController {
 
         // 1) prendi tutte le recensioni del libro
         List<Recensione> allReviews = RecensioneService.getBookReviews(id);
-
+        List<Long> imageIds=bookService.getImageSummariesForBook(id);
+        if(!imageIds.isEmpty()) {
+            imageIds.removeFirst();
+        }
         // 2) utente corrente
         Utente currentUser = userService.getCurrentUser();
 
@@ -106,7 +109,7 @@ public class LibriController {
         model.addAttribute("book",        bookService.findById(id));
         model.addAttribute("hasUserReview",  hasUserReview);
         model.addAttribute("bookReviews",  sortedReviews);
-
+        model.addAttribute("imageIds",  imageIds);
         return "book";
     }
 
@@ -216,7 +219,7 @@ public class LibriController {
         bookService.save(book);
         redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
 
-        return "redirect:/";
+        return "redirect:/books";
     }
 
 

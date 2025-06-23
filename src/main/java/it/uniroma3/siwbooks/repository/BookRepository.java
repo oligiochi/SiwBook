@@ -68,4 +68,8 @@ public interface BookRepository extends CrudRepository<Books, Long> {
     @Query("SELECT b FROM Books b WHERE LOWER(REPLACE(b.title, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:title, ' ', ''), '%'))")
     List<Books> searchByTitleIgnoringSpaces(@Param("title") String title);
 
+    @Query("SELECT i.id FROM Image i WHERE i.book.id = :bookId")
+    List<Long> findImageIdsByBookId(@Param("bookId") Long bookId);
+
+
 }

@@ -83,11 +83,19 @@ public class ImageController {
                 .body(cover.getData());
     }
 
-    private HttpHeaders getHeaders(Image Image, byte[] data) {
+    private HttpHeaders getHeaders(Image image, byte[] data) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(Image.getContentType()));
+        headers.setContentType(MediaType.parseMediaType(image.getContentType()));
         headers.setContentLength(data.length);
-        headers.setCacheControl(CacheControl.maxAge(Duration.ofDays(30)));
+
+        // Disattiva completamente la cache
+        headers.setCacheControl(CacheControl.noStore());
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+
         return headers;
     }
+
+
+
 }
