@@ -34,9 +34,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const items = dropdownEl.querySelectorAll('.dropdown-item');
         const selectedIds = [];
 
+        // 1) PRE-POPOLAZIONE da hiddenField.value (es. "3,7,12")
+        if (hiddenField.value) {
+            hiddenField.value
+                .split(',')
+                .map(id => id.trim())
+                .filter(id => id)
+                .forEach(id => {
+                    const item = dropdownEl.querySelector(`.dropdown-item[data-id="${id}"]`);
+                    if (item) {
+                        addItem(id, item.textContent);
+                        selectedIds.push(id);
+                    }
+                });
+            updateHidden();
+            filterItems();
+        }
+
+        // 2) Event listeners standard
         inputEl.addEventListener('focus',  () => dropdownEl.style.display = 'block');
         inputEl.addEventListener('blur',   () => setTimeout(() => dropdownEl.style.display = 'none', 200));
-        inputEl.addEventListener('input',   filterItems);
+        inputEl.addEventListener('input',  filterItems);
 
         items.forEach(i => i.addEventListener('click', () => {
             const id = i.dataset.id;
@@ -53,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const term = inputEl.value.toLowerCase();
             items.forEach(i => {
                 const already = selectedIds.includes(i.dataset.id);
-                const match = i.textContent.toLowerCase().includes(term);
+                const match   = i.textContent.toLowerCase().includes(term);
                 i.style.display = (!already && match) ? 'block' : 'none';
             });
         }
@@ -128,13 +146,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookForm      = document.getElementById('bookForm');
     const successMessage = document.getElementById('successMessage');
     bookForm.addEventListener('reset', () => {
-        document.getElementById('selectedAuthors').innerHTML = '';
-        document.getElementById('selectedGenres').innerHTML  = '';
-        document.getElementById('authorsField').value       = '';
-        document.getElementById('genresField').value        = '';
-        imagePreview.innerHTML = '';
-        imageFiles = [];
-        titleCount.textContent = '0';
+        // Viene chiamato PRIMA del reset nativo,
+        // quindi posticipiamo la pulizia a dopo:
+        setTimeout(() => {
+            console.log('Reset completato');
+            document.getElementById('selectedAuthors').innerHTML = '';
+            document.getElementById('selectedGenres').innerHTML  = '';
+            document.getElementById('authorsField').value       = '';
+            document.getElementById('genresField').value        = '';
+            imagePreview.innerHTML = '';
+            imageFiles = [];
+            titleCount.textContent = '0';
+        }, 0);
     });
+
+    bookForm.addEventListener('submit', () => {
+        const dt = new DataTransfer();
+        imageFiles.forEach(file => dt.items.add(file));
+        console.log('Sto per inviare', dt.files.length, 'file:', dt.files);  // <<<-- debug
+        imageUpload.files = dt.files;
+    });
+
 
 });

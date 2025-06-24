@@ -29,7 +29,8 @@
 
     <!-- Binding al model attribute "book" -->
     <form
-            th:action="@{/book/add}"
+            id="bookForm"
+            th:action="@{/admin/book/add}"
             th:object="${book}"
             method="post"
             enctype="multipart/form-data"

@@ -1,4 +1,4 @@
-<div th:fragment="site-header">
+<div th:fragment="site-header" xmlns:sec="http://www.w3.org/1999/xhtml">
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark top-bar">
       <div class="container-fluid">
@@ -13,6 +13,7 @@
             <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="/books">Libri</a></li>
             <li class="nav-item"><a class="nav-link" href="/author">Autori</a></li>
+            <li sec:authorize="hasAuthority('ADMIN')" class="nav-item"><a class="nav-link" href="/admin/book/add">ADD Libro</a></li>
           </ul>
           <ul class="navbar-nav mb-2 mb-lg-0">
             <li class="nav-item" th:if="${userDetails == null}"><a class="nav-link" href="/login">Login</a></li>

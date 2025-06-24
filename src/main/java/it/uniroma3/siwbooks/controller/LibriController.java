@@ -113,7 +113,7 @@ public class LibriController {
         return "book";
     }
 
-    @GetMapping("/book/add")
+    @GetMapping("/admin/book/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("authors", autoreService.findAll()); // List<Author>
         model.addAttribute("genres", genereService.findAll());   // List<Genre>
@@ -121,7 +121,7 @@ public class LibriController {
         return "FormBook"; // oppure il nome effettivo del file Thymeleaf
     }
 
-    @PostMapping("/book/add")
+    @PostMapping("/admin/book/add")
     public String addBook(@ModelAttribute("book") Books book,
                           BindingResult bindingResult,
 
@@ -210,7 +210,7 @@ public class LibriController {
             return "FormBook";
         }
 
-        if (!isIsAdmin() && false) {
+        if (!isIsAdmin()) {
             redirectAttributes.addFlashAttribute("error", "Non puoi Creare un libro. Solo admin!");
             return "redirect:/";
         }
