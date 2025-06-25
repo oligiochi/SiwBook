@@ -178,4 +178,7 @@ public class BookService {
         return bookRepository.findImageIdsByBookId(bookId);
     }
 
+    public void deleteBook(Long bookId) {
+        bookRepository.deleteById(bookId);
+    }
 }

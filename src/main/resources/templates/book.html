@@ -54,7 +54,7 @@
                         </a>
                     </div>
                     <div class="book-action delete">
-                        <a class="btn btn-primary" th:href="@{'#'}" title="Elimina">
+                        <a class="btn btn-primary" th:href="@{/admin/deleteBook/{id}(id=${book.id})}" title="Elimina">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>

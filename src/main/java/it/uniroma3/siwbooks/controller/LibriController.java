@@ -222,6 +222,17 @@ public class LibriController {
         return "redirect:/books";
     }
 
+    @GetMapping("admin/deleteBook/{book_id}")
+    public String removeBook(@PathVariable Long book_id,RedirectAttributes redirectAttributes) {
+        if (isIsAdmin()) {
+            bookService.deleteBook(book_id);
+            redirectAttributes.addFlashAttribute("success", "Libro eliminato con successo!");
+            return "redirect:/books";
+        }
+        redirectAttributes.addFlashAttribute("error", "Non eliminare questo libro. Solo admin!");
+        return "redirect:/books";
+    }
+
 
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
