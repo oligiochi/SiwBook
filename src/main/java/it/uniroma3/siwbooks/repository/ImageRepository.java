@@ -35,4 +35,20 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      * Trova immagini caricate in un determinato periodo
      */
     List<Image> findByUploadDateBetween(LocalDateTime start, LocalDateTime end);
+    // Aggiungi questi metodi al tuo ImageRepository esistente
+
+    /**
+     * Trova immagini orfane (senza libro)
+     */
+    List<Image> findByBookIsNull();
+
+    /**
+     * Trova immagini orfane più vecchie di una data
+     */
+    List<Image> findByBookIsNullAndUploadDateBefore(LocalDateTime date);
+
+    /**
+     * Trova immagini per lista di ID
+     */
+    List<Image> findByIdIn(List<Long> ids);
 }

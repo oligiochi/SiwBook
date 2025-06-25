@@ -1,5 +1,6 @@
 package it.uniroma3.siwbooks.controller;
 
+import it.uniroma3.siwbooks.dto.ImageDto;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.models.Image;
 import it.uniroma3.siwbooks.service.BookService;
@@ -10,6 +11,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -96,6 +102,88 @@ public class ImageController {
         return headers;
     }
 
+    // Aggiungi questi metodi al tuo ImageController esistente
 
+    /**
+     * Upload multiple immagini (AJAX)
+     */
+    @PostMapping("/upload")
+    @ResponseBody
+    public ResponseEntity<?> uploadImages(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "bookId", required = false) Long bookId) {
+
+        try {
+            List<Image> uploadedImages = imageService.createImages(files);
+
+            // Se c'è un bookId, associa le immagini al libro
+            if (bookId != null) {
+                Books book = bookService.findById(bookId);
+                if (book != null) {
+                    uploadedImages.forEach(img -> {
+                        img.setBook(book);
+                        imageService.saveImage(img); // Dovrai aggiungere questo metodo
+                    });
+                }
+            }
+
+            // Ritorna i dati delle immagini per il frontend
+            List<ImageDto> imageDtos = uploadedImages.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "images", imageDtos,
+                    "message", "Immagini caricate con successo"
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "success", false,
+                            "message", "Errore durante l'upload: " + e.getMessage()
+                    ));
+        }
+    }
+
+    /**
+     * Ottieni tutte le immagini di un libro
+     */
+    @GetMapping("/book/{bookId}/images")
+    @ResponseBody
+    public ResponseEntity<List<ImageDto>> getBookImages(@PathVariable Long bookId) {
+        try {
+            List<Image> images = imageService.findByBookId(bookId);
+            List<ImageDto> imageDtos = images.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(imageDtos);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Upload temporaneo (senza associazione a libro)
+     */
+    @PostMapping("/upload/temp")
+    @ResponseBody
+    public ResponseEntity<?> uploadTempImages(@RequestParam("files") MultipartFile[] files) {
+        return uploadImages(files, null);
+    }
+
+    // DTO Helper method
+    private ImageDto convertToDto(Image image) {
+        return new ImageDto(
+                image.getId(),
+                image.getFileName(),
+                image.getOriginalFileName(),
+                "/images/" + image.getId(), // URL per visualizzare l'immagine
+                image.getFileSize(),
+                image.getContentType()
+        );
+    }
 
 }

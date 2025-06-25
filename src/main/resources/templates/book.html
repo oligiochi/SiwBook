@@ -87,7 +87,7 @@
         </div>
     </div>
 </section>
-<div th:insert="~{fragments/errorModal :: errorModal}"></div>
+<div th:insert="~{fragments/errorModal :: errorModal(error)}"></div>
 <script>
     function toggleMenu(button) {
         const menu = button.nextElementSibling;

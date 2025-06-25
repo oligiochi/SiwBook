@@ -3,6 +3,8 @@ package it.uniroma3.siwbooks.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +22,10 @@ public class Books {
     @ManyToMany
     private List<Genere> generi;
     @NotNull
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime releaseDate;
-    @Lob
-    private byte[] pdf;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private List<Image> images = new ArrayList<>();
 
@@ -76,14 +78,6 @@ public class Books {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public byte[] getPdf() {
-        return pdf;
-    }
-
-    public void setPdf(byte[] pdf) {
-        this.pdf = pdf;
     }
 
     public Image getCoverImage(){

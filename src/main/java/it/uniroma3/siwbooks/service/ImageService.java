@@ -1,5 +1,7 @@
 package it.uniroma3.siwbooks.service;
 
+import it.uniroma3.siwbooks.models.Books;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -144,5 +146,64 @@ public class ImageService {
         }
 
         return images;
+    }
+
+    // Aggiungi questi metodi al tuo ImageService esistente
+
+    /**
+     * Salva un'immagine già esistente (per aggiornamenti)
+     */
+    public Image saveImage(Image image) {
+        return imageRepository.save(image);
+    }
+
+    /**
+     * Trova immagini per book ID
+     */
+    public List<Image> findByBookId(Long bookId) {
+        return imageRepository.findByBookId(bookId);
+    }
+
+    /**
+     * Elimina tutte le immagini di un libro
+     */
+    @Transactional
+    public void deleteImagesByBookId(Long bookId) {
+        imageRepository.deleteByBookId(bookId);
+    }
+
+    /**
+     * Associa immagini a un libro
+     */
+    @Transactional
+    public void associateImagesToBook(List<Long> imageIds, Long bookId, BookService bookService) {
+        Books book = bookService.findById(bookId);
+        if (book == null) {
+            throw new IllegalArgumentException("Libro non trovato");
+        }
+
+        for (Long imageId : imageIds) {
+            Image image = findById(imageId);
+            image.setBook(book);
+            saveImage(image);
+        }
+    }
+
+    /**
+     * Trova immagini orfane (senza libro associato)
+     */
+    public List<Image> findOrphanImages() {
+        return imageRepository.findByBookIsNull();
+    }
+
+    /**
+     * Elimina immagini orfane più vecchie di X giorni
+     */
+    @Transactional
+    public void cleanupOrphanImages(int daysOld) {
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysOld);
+        List<Image> orphanImages = imageRepository.findByBookIsNullAndUploadDateBefore(cutoffDate);
+
+        imageRepository.deleteAll(orphanImages);
     }
 }

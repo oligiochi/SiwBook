@@ -129,31 +129,33 @@
       >
         <label for="releaseDate">Data di Pubblicazione *</label>
         <input
-                th:field="*{releaseDate}"
                 type="date"
                 id="releaseDate"
+                name="releaseDate"
                 class="input"
                 required
+                th:value="${book.releaseDate != null} ? ${#temporals.format(book.releaseDate, 'yyyy-MM-dd')} : ''"
                 th:classappend="${#fields.hasErrors('releaseDate')} ? ' input-error'"
         />
+
         <div class="error-message" th:errors="*{releaseDate}"></div>
       </div>
 
       <!-- Upload immagini -->
-      <div
-              class="form-group image-upload-container"
-              id="dropArea"
-              th:classappend="${#fields.hasErrors('images')} ? ' error'"
-      >
+      <!-- Sezione Copertina e Immagini -->
+      <div class="form-group image-upload-container" id="dropArea">
         <label>Copertina e Immagini</label>
+
+        <!-- Input file senza th:field, con name per @RequestParam -->
         <input
-                th:field="*{images}"
                 type="file"
                 id="imageUpload"
+                name="images"
                 accept="image/*"
                 multiple
                 style="display: none;"
         />
+
         <button
                 type="button"
                 id="uploadTrigger"
@@ -162,12 +164,16 @@
         >
           <i class="fas fa-cloud-upload-alt"></i> Scegli Immagini
         </button>
+
         <p style="margin-top: 10px; color: #7f8c8d;">
           Trascina le immagini qui o clicca per selezionare
         </p>
-        <div class="image-preview-container" id="imagePreview"></div>
+
+        <!-- Anteprima JS delle immagini selezionate -->
+        <div class="image-preview-container" id="imagePreview" th:attr="data-existing-image-ids=${imageIds}"></div>
+        <!-- Messaggio di errore (impostato dal controller in model.addAttribute("imageError", ...)) -->
+        <div th:if="${imageError}" class="error-message" th:text="${imageError}"></div>
       </div>
-      <div class="error-message" th:errors="*{images}"></div>
 
       <!-- Bottoni di invio -->
       <div class="btn-container">

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -192,7 +193,7 @@ public class LibriController {
                         Image image = imageService.createImage(file);
                         images.add(image);
                     } catch (Exception e) {
-                        bindingResult.rejectValue("images", "error.upload", "Errore nel caricamento delle immagini");
+                        bindingResult.rejectValue("imageError", "error.upload", "Errore nel caricamento delle immagini");
                         break;
                     }
                 }
@@ -233,6 +234,18 @@ public class LibriController {
         return "redirect:/books";
     }
 
+    @Transactional(readOnly = true)
+    @GetMapping("book/editBook/{book_id}")
+    public String editBook(@PathVariable Long book_id,Model model) {
+        Books book=bookService.findById(book_id);
+        model.addAttribute("authors", autoreService.findAll());
+        model.addAttribute("genres", genereService.findAll());
+        model.addAttribute("book", book);
+        model.addAttribute("releaseDate",book.getReleaseDate().toLocalDate());
+        model.addAttribute("imageIds",bookService.getImageSummariesForBook(book_id));
+        return "FormBook";
+    }
+
 
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
@@ -267,18 +280,3 @@ public class LibriController {
                 .collect(Collectors.toList());
     }
 }
-/*
-
-
-
-
-
-            // Ora puoi usare releaseDate e images come vuoi
-            bookService.registerBook(book, imagesParam, selectedAuthors);
-
-            redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
-            return "redirect:/book/" + book.getId();
-        }
-
-        return "redirect:/book";
- */
