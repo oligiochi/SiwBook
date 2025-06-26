@@ -1,7 +1,6 @@
 package it.uniroma3.siwbooks.service;
 
 import it.uniroma3.siwbooks.models.Books;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +8,7 @@ import java.util.Set;
 
 import it.uniroma3.siwbooks.models.Image;
 import it.uniroma3.siwbooks.repository.ImageRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -160,6 +160,7 @@ public class ImageService {
     /**
      * Trova immagini per book ID
      */
+    @Transactional(readOnly = true)
     public List<Image> findByBookId(Long bookId) {
         return imageRepository.findByBookId(bookId);
     }

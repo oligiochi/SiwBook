@@ -111,6 +111,7 @@ public class LibriController {
         model.addAttribute("hasUserReview",  hasUserReview);
         model.addAttribute("bookReviews",  sortedReviews);
         model.addAttribute("imageIds",  imageIds);
+        model.addAttribute("isEditMode", false);
         return "book";
     }
 
@@ -119,6 +120,9 @@ public class LibriController {
         model.addAttribute("authors", autoreService.findAll()); // List<Author>
         model.addAttribute("genres", genereService.findAll());   // List<Genre>
         model.addAttribute("book", new Books());
+        model.addAttribute("isEditMode", false);
+        model.addAttribute("formAction", "/admin/book/add");
+
         return "FormBook"; // oppure il nome effettivo del file Thymeleaf
     }
 
@@ -127,9 +131,10 @@ public class LibriController {
                           BindingResult bindingResult,
 
                           @RequestParam(value = "releaseDate", required = false) String releaseDateString,
-                          @RequestParam(value = "images", required = false) MultipartFile[] imagesParam,
                           @RequestParam(value = "author", required = false) String authorsCsv,
                           @RequestParam(value = "generi", required = false) String genresCsv,
+                          @RequestParam(value = "imageIds", required = false) String imageIds,
+                          @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds,
 
                           RedirectAttributes redirectAttributes,
                           Model model) {
@@ -182,32 +187,23 @@ public class LibriController {
             bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
         }
 
-        // Gestione manuale delle immagini
-        List<Image> images = new ArrayList<>();
-        if (imagesParam != null && imagesParam.length > 0) {
-            for (MultipartFile file : imagesParam) {
-                if (!file.isEmpty()) {
-                    try {
-                        // Qui devi implementare la logica per salvare l'immagine
-                        // e creare l'oggetto Image
-                        Image image = imageService.createImage(file);
-                        images.add(image);
-                    } catch (Exception e) {
-                        bindingResult.rejectValue("imageError", "error.upload", "Errore nel caricamento delle immagini");
-                        break;
-                    }
-                }
-            }
-        }
-        book.setImages(images);
-
-        // Valida il book solo sui campi che non gestisci manualmente
+        // Validazione del book
         bookValidator.validate(book, bindingResult);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("authors", autoreService.findAll());
             model.addAttribute("genres", genereService.findAll());
             model.addAttribute("book", book);
+
+            List<Image> bookImages = new ArrayList<>();
+            List<String> ids = new ArrayList<>(List.of(imageIds.split(",")));
+            ids.removeFirst();
+
+            for (String id : ids)
+                bookImages.add(imageService.findById(Long.valueOf(id.trim())));
+            model.addAttribute("bookImages", bookImages);
+            //model.addAttribute("removeImageIds", removeImageIds);
+
             return "FormBook";
         }
 
@@ -216,11 +212,32 @@ public class LibriController {
             return "redirect:/";
         }
 
-        // Salva il libro
-        bookService.save(book);
-        redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
+        try {
+            // Salva il libro
+            bookService.save(book);
 
-        return "redirect:/books";
+            // Associa immagini esistenti
+            if (imageIds != null && !imageIds.trim().isEmpty()) {
+                List<Long> imageIdList = Arrays.stream(imageIds.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Long::valueOf)
+                        .collect(Collectors.toList());
+                imageService.associateImagesToBook(imageIdList, book.getId(), bookService);
+            }
+
+            // Elimina immagini rimosse
+            if (removeImageIds != null && !removeImageIds.isEmpty()) {
+                removeImageIds.forEach(imageService::deleteImage);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
+            return "redirect:/book/" + book.getId();
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Errore durante il salvataggio: " + e.getMessage());
+            return "FormBook";
+        }
     }
 
     @GetMapping("admin/deleteBook/{book_id}")
@@ -234,18 +251,121 @@ public class LibriController {
         return "redirect:/books";
     }
 
-    @Transactional(readOnly = true)
     @GetMapping("book/editBook/{book_id}")
-    public String editBook(@PathVariable Long book_id,Model model) {
-        Books book=bookService.findById(book_id);
+    public String editBook(@PathVariable Long book_id, Model model) {
+        Books book = bookService.findById(book_id);
+        if (book == null) {
+            return "redirect:/books";
+        }
+
+        // Carica le immagini esistenti
+
+
         model.addAttribute("authors", autoreService.findAll());
         model.addAttribute("genres", genereService.findAll());
         model.addAttribute("book", book);
-        model.addAttribute("releaseDate",book.getReleaseDate().toLocalDate());
-        model.addAttribute("imageIds",bookService.getImageSummariesForBook(book_id));
+        List<Image> bookImages = imageService.findByBookId(book_id);
+        model.addAttribute("bookImages", bookImages);
+        model.addAttribute("isEditMode", true);
+        model.addAttribute("formAction", "/book/editBook/"+book_id);
+
         return "FormBook";
     }
 
+    @PostMapping("book/editBook/{book_id}")
+    public String updateBook(
+            @ModelAttribute("book") Books book,
+            BindingResult bindingResult,
+            @RequestParam(value = "releaseDate", required = false) String releaseDateString,
+            @RequestParam(value = "author", required = false) String authorsCsv,
+            @RequestParam(value = "generi", required = false) String genresCsv,
+            @RequestParam(value = "imageIds", required = false) String imageIds,
+            @RequestParam(value = "removeImageIdsCsv", required = false) String removeImageIdsCsv,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        // Flag edit mode
+        model.addAttribute("isEditMode", true);
+
+        // 1) Gestione releaseDate
+        if (releaseDateString != null && !releaseDateString.isBlank()) {
+            try {
+                LocalDate date = LocalDate.parse(releaseDateString);
+                book.setReleaseDate(date.atStartOfDay());
+            } catch (DateTimeParseException e) {
+                bindingResult.rejectValue("releaseDate", "error.date", "Formato data non valido");
+            }
+        } else {
+            bindingResult.rejectValue("releaseDate", "error.required", "Data di pubblicazione obbligatoria");
+        }
+
+        // 2) Gestione autori
+        if (authorsCsv != null && !authorsCsv.isBlank()) {
+            try {
+                List<Autore> authors = Arrays.stream(authorsCsv.split(","))
+                        .map(String::trim).filter(s -> !s.isEmpty())
+                        .map(Long::parseLong)
+                        .map(autoreService::findById)
+                        .collect(Collectors.toList());
+                book.setAuthor(authors);
+            } catch (NumberFormatException e) {
+                bindingResult.rejectValue("author", "error.format", "Formato autori non valido");
+            }
+        } else {
+            bindingResult.rejectValue("author", "error.required", "Almeno un autore è obbligatorio");
+        }
+
+        // 3) Gestione generi
+        if (genresCsv != null && !genresCsv.isBlank()) {
+            try {
+                List<Genere> generi = Arrays.stream(genresCsv.split(","))
+                        .map(String::trim).filter(s -> !s.isEmpty())
+                        .map(Long::parseLong)
+                        .map(genereService::findById)
+                        .collect(Collectors.toList());
+                book.setGeneri(generi);
+            } catch (NumberFormatException e) {
+                bindingResult.rejectValue("generi", "error.format", "Formato generi non valido");
+            }
+        } else {
+            bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
+        }
+
+        // Solo admin
+        if (!isIsAdmin()) {
+            redirectAttributes.addFlashAttribute("error", "Non puoi modificare un libro. Solo admin!");
+            return "redirect:/";
+        }
+
+        try {
+            // Aggiorna il libro esistente
+            bookService.update(book);
+
+            // Associa nuove immagini
+            if (imageIds != null && !imageIds.trim().isEmpty()) {
+                List<Long> newImageIds = Arrays.stream(imageIds.split(","))
+                        .map(String::trim).filter(s->!s.isEmpty())
+                        .map(Long::valueOf)
+                        .collect(Collectors.toList());
+                imageService.associateImagesToBook(newImageIds, book.getId(), bookService);
+            }
+
+            // Rimuovi immagini segnate
+            if (removeImageIdsCsv != null && !removeImageIdsCsv.isBlank()) {
+                List<Long> toRemove = Arrays.stream(removeImageIdsCsv.split(","))
+                        .map(String::trim).filter(s->!s.isEmpty())
+                        .map(Long::valueOf).collect(Collectors.toList());
+                toRemove.forEach(imageService::deleteImage);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Libro aggiornato con successo!");
+            return "redirect:/book/" + book.getId();
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Errore durante l'aggiornamento: " + e.getMessage());
+            return "FormBook";
+        }
+    }
 
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
@@ -279,4 +399,6 @@ public class LibriController {
                 ))
                 .collect(Collectors.toList());
     }
+
+
 }

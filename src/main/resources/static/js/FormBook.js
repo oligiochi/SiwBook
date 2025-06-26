@@ -1,35 +1,139 @@
-// FormBook.js
-
 document.addEventListener('DOMContentLoaded', function() {
-    // 1) Recupera gli ID esistenti dal data-attribute di #imagePreview
-    const imagePreview = document.getElementById('imagePreview');
-    const existingIds = JSON.parse(
-        imagePreview.getAttribute('data-existing-image-ids') || '[]'
+    // === 1) Elementi DOM comuni ===
+    const bookForm       = document.getElementById('bookForm');
+    const bookId         = bookForm.dataset.bookId || null;
+    const titleInput     = document.getElementById('bookTitle');
+    const titleCount     = document.getElementById('titleCount');
+    const authorDropdown = document.getElementById('authorDropdown');
+    const genreDropdown  = document.getElementById('genreDropdown');
+
+    // === 2) Elementi gestione immagini ===
+    const imageUpload    = document.getElementById('imageUpload');
+    const uploadTrigger  = document.getElementById('uploadTrigger');
+    const dropArea       = document.getElementById('dropArea');
+    const imagePreview   = document.getElementById('imagePreview');
+    let uploadedImages   = [];
+
+    // === 3) Caricamento immagini esistenti (modalità modifica) ===
+    if (bookId) loadExistingImages();
+    else {
+        const existingIds = JSON.parse(imagePreview.getAttribute('data-existing-image-ids') || '[]');
+        uploadedImages = existingIds.map(id => ({ id, url: `/images/${id}`, originalFileName: `Immagine ${id}` }));
+        renderImages();
+    }
+
+    // === 4) Eventi immagine: upload e drag’n’drop ===
+    uploadTrigger.addEventListener('click', () => imageUpload.click());
+    imageUpload.addEventListener('change', e => uploadFiles(Array.from(e.target.files)));
+
+    ['dragenter','dragover','dragleave','drop'].forEach(evt =>
+        dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); })
     );
-    const existingImages = existingIds.map(id => ({
-        id,
-        url: `/images/${id}`
-    }));
+    ['dragenter','dragover'].forEach(evt =>
+        dropArea.addEventListener(evt, () => dropArea.classList.add('highlight'))
+    );
+    ['dragleave','drop'].forEach(evt =>
+        dropArea.addEventListener(evt, () => dropArea.classList.remove('highlight'))
+    );
+    dropArea.addEventListener('drop', e => uploadFiles(Array.from(e.dataTransfer.files)));
 
-    // 2) Inizializza imageFiles con le esistenti
-    let imageFiles = existingImages.slice();  // elementi {id, url} e poi File
+    async function uploadFiles(files) {
+        if (!files.length) return;
+        const formData = new FormData();
+        files.forEach(f => formData.append('files', f));
+        if (bookId) formData.append('bookId', bookId);
 
-    // 3) Elementi del DOM
-    const titleInput    = document.getElementById('bookTitle');
-    const titleCount    = document.getElementById('titleCount');
-    const authorDropdown= document.getElementById('authorDropdown');
-    const genreDropdown = document.getElementById('genreDropdown');
-    const imageUpload   = document.getElementById('imageUpload');
-    const uploadTrigger = document.getElementById('uploadTrigger');
-    const dropArea      = document.getElementById('dropArea');
-    const bookForm      = document.getElementById('bookForm');
+        try {
+            showLoadingState();
+            const res = await fetch('/images/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success && data.images) {
+                uploadedImages.push(...data.images);
+                renderImages();
+            } else {
+                showError(data.message || 'Errore nel caricamento immagini');
+            }
+        } catch (err) {
+            console.error(err);
+            showError('Errore durante l’upload');
+        } finally {
+            hideLoadingState();
+        }
+    }
 
-    // 4) Contatore caratteri titolo
+    async function loadExistingImages() {
+        try {
+            const res = await fetch(`/images/book/${bookId}/images`);
+            const images = await res.json();
+            uploadedImages = images;
+            renderImages();
+        } catch (err) {
+            console.error('Errore caricamento immagini:', err);
+        }
+    }
+
+    async function deleteImage(imageId) {
+        if (!confirm('Sei sicuro di voler eliminare questa immagine?')) return;
+        try {
+            const res = await fetch(`/images/${imageId}`, { method: 'DELETE' });
+            if (res.ok) {
+                uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+                renderImages();
+            } else {
+                showError('Impossibile eliminare l’immagine');
+            }
+        } catch (err) {
+            showError('Errore durante l’eliminazione');
+        }
+    }
+
+    function renderImages() {
+        imagePreview.innerHTML = '';
+        uploadedImages.forEach(img => {
+            const container = document.createElement('div');
+            container.className = 'image-actions';
+            container.innerHTML = `
+                <img class="image-preview" src="${img.url}" alt="${img.originalFileName}">
+                <div class="remove-image" data-image-id="${img.id}">&times;</div>
+            `;
+            container.querySelector('.remove-image').addEventListener('click', () => deleteImage(img.id));
+            imagePreview.appendChild(container);
+        });
+        updateHiddenImageIds();
+    }
+
+    function updateHiddenImageIds() {
+        let hidden = document.getElementById('imageIds');
+        if (!hidden) {
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'imageIds';
+            hidden.id = 'imageIds';
+            bookForm.appendChild(hidden);
+        }
+        hidden.value = uploadedImages.map(img => img.id).join(',');
+    }
+
+    function showLoadingState() {
+        uploadTrigger.disabled = true;
+        uploadTrigger.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Caricamento...';
+    }
+
+    function hideLoadingState() {
+        uploadTrigger.disabled = false;
+        uploadTrigger.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Scegli Immagini';
+    }
+
+    function showError(msg) {
+        alert(msg);
+    }
+
+    // === 5) Contatore caratteri titolo ===
     titleInput.addEventListener('input', () => {
         titleCount.textContent = titleInput.value.length;
     });
 
-    // 5) Multi-select autori e generi (come prima)
+    // === 6) Multi-select autori e generi ===
     setupMultiSelect(
         document.getElementById('authorInput'),
         authorDropdown,
@@ -96,94 +200,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 6) Caricamento nuove immagini + drag’n’drop
-    uploadTrigger.addEventListener('click', () => imageUpload.click());
-    imageUpload.addEventListener('change', e => {
-        imageFiles.push(...e.target.files);
-        renderPreviews();
-    });
-    ['dragenter','dragover','dragleave','drop'].forEach(evt =>
-        dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); })
-    );
-    ['dragenter','dragover'].forEach(evt =>
-        dropArea.addEventListener(evt, () => dropArea.classList.add('highlight'))
-    );
-    ['dragleave','drop'].forEach(evt =>
-        dropArea.addEventListener(evt, () => dropArea.classList.remove('highlight'))
-    );
-    dropArea.addEventListener('drop', e => {
-        imageFiles.push(...e.dataTransfer.files);
-        renderPreviews();
-    });
-
-    // 7) renderPreviews unificato, con STESSA grafica
-    function renderPreviews() {
-        imagePreview.innerHTML = '';
-
-        imageFiles.forEach((entry, idx) => {
-            // crea wrapper identico a prima
-            const c = document.createElement('div');
-            c.className = 'image-actions';
-
-            if (entry instanceof File) {
-                // Nuova immagine: come prima
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    c.innerHTML = `
-            <img class="image-preview" src="${ev.target.result}" data-index="${idx}">
-            <div class="remove-image" data-index="${idx}">&times;</div>
-          `;
-                    c.querySelector('.remove-image').addEventListener('click', () => {
-                        imageFiles.splice(idx, 1);
-                        renderPreviews();
-                    });
-                    imagePreview.appendChild(c);
-                };
-                reader.readAsDataURL(entry);
-
-            } else {
-                // Immagine esistente: stessa grafica
-                c.innerHTML = `
-          <img class="image-preview" src="${entry.url}" data-id="${entry.id}">
-          <div class="remove-image" data-id="${entry.id}">&times;</div>
-        `;
-                c.querySelector('.remove-image').addEventListener('click', () => {
-                    imageFiles = imageFiles.filter(e => e.id !== entry.id);
-                    renderPreviews();
-                    // segnala al server di rimuovere
-                    const hidden = document.createElement('input');
-                    hidden.type  = 'hidden';
-                    hidden.name  = 'removeImageIds';
-                    hidden.value = entry.id;
-                    bookForm.appendChild(hidden);
-                });
-                imagePreview.appendChild(c);
-            }
-        });
-    }
-
-    // 8) Reset del form
+    // === 7) Reset ===
     bookForm.addEventListener('reset', () => {
         setTimeout(() => {
             document.getElementById('selectedAuthors').innerHTML = '';
             document.getElementById('selectedGenres').innerHTML  = '';
             document.getElementById('authorsField').value       = '';
             document.getElementById('genresField').value        = '';
-            imageFiles = existingImages.slice();
+            uploadedImages = [];
+            renderImages();
             titleCount.textContent = '0';
-            renderPreviews();
         }, 0);
     });
-
-    // 9) Submit: solo File reali
-    bookForm.addEventListener('submit', () => {
-        const dt = new DataTransfer();
-        imageFiles.forEach(e => {
-            if (e instanceof File) dt.items.add(e);
-        });
-        imageUpload.files = dt.files;
-    });
-
-    // 10) Primo render
-    renderPreviews();
 });

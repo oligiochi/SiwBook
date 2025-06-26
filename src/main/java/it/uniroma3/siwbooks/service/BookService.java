@@ -2,9 +2,10 @@ package it.uniroma3.siwbooks.service;
 
 import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
-import it.uniroma3.siwbooks.models.Image;
+import org.springframework.transaction.annotation.Transactional;
 import it.uniroma3.siwbooks.models.Recensione;
 import it.uniroma3.siwbooks.repository.BookRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -143,6 +144,24 @@ public class BookService {
             if (!asc) cmp = cmp.reversed();
         }
         all.sort(cmp);
+    }
+
+    @Transactional
+    public Books update(Books updatedBook) {
+        // 1. Recupera l’entità esistente dal database
+        Books existing = bookRepository.findById(updatedBook.getId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Libro non trovato con id " + updatedBook.getId()));
+
+        // 2. Aggiorna i campi desiderati
+        existing.setTitle(updatedBook.getTitle());
+        existing.setReleaseDate(updatedBook.getReleaseDate());
+        existing.setAuthor(updatedBook.getAuthor());
+        existing.setGeneri(updatedBook.getGeneri());
+        // qui non tocchiamo immagini: le gestiamo separatamente
+
+        // 3. Salva e ritorna l’entità aggiornata
+        return bookRepository.save(existing);
     }
 
     public Double AvgStar(Books book){
