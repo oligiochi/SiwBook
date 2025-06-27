@@ -1,8 +1,10 @@
 package it.uniroma3.siwbooks.controller;
 
 import it.uniroma3.siwbooks.dto.ImageDto;
+import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.models.Image;
+import it.uniroma3.siwbooks.service.AutoreService;
 import it.uniroma3.siwbooks.service.BookService;
 import it.uniroma3.siwbooks.service.ImageService;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import java.io.IOException;
-import java.time.Duration;
 
 @Controller
 @RequestMapping("/images")
@@ -28,6 +29,8 @@ public class ImageController {
     private ImageService imageService;
     @Autowired
     private BookService bookService;
+    @Autowired
+    private AutoreService autoreService;
 
     /**
      * Serve un'immagine tramite il suo ID
@@ -184,6 +187,31 @@ public class ImageController {
                 image.getFileSize(),
                 image.getContentType()
         );
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping("/author/{id}")
+    public ResponseEntity<byte[]> getAuthorCover(@PathVariable Long id) {
+        Autore autore = autoreService.findById(id);
+        Image cover = (autore != null) ? autore.getImages() : null;
+
+        if (cover == null || cover.getData() == null) {
+            try {
+                ClassPathResource placeholder = new ClassPathResource("static/images/autore.png");
+                byte[] data = placeholder.getInputStream().readAllBytes();
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(data);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        //genera heder
+        HttpHeaders headers = getHeaders(cover, cover.getData());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(cover.getData());
     }
 
 }

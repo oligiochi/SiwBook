@@ -51,4 +51,7 @@ public class AutoreService {
         repository.delete(autore);
     }
 
+    public List<Autore> searchByTerm(String term) {
+        return repository.searchByTerm(term);
+    }
 }

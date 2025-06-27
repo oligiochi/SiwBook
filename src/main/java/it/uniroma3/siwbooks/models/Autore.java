@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +34,10 @@ public class Autore {
     private LocalDateTime dateOfDeath;
     @NotNull
     private String nationality;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @JoinColumn(name = "Autore_id")
+    private Image images;
 
     @Override
     public boolean equals(Object o) {
@@ -100,5 +105,13 @@ public class Autore {
 
     public void setNationality(String nationality) {
         this.nationality = nationality;
+    }
+
+    public Image getImages() {
+        return images;
+    }
+
+    public void setImages(Image images) {
+        this.images = images;
     }
 }

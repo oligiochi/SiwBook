@@ -1,7 +1,11 @@
 package it.uniroma3.siwbooks.repository;
 
 import it.uniroma3.siwbooks.models.Autore;
+import it.uniroma3.siwbooks.models.Books;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 
 
@@ -11,5 +15,13 @@ public interface AutoreRepository extends CrudRepository<it.uniroma3.siwbooks.mo
     public List<Autore> findAllByOrderByCognomeAsc();
     public List<Autore> findByNome(String nome);
     public List<Autore> findByCognome(String cognome);
-
+    @Query("""
+        FROM Autore a
+        WHERE (:searchTerm IS NULL
+               OR LOWER(a.nome)   LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(a.cognome)LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+               OR LOWER(a.nationality) = LOWER(:searchTerm)                    
+              )
+    """)
+    List<Autore> searchByTerm(@Param("searchTerm") String searchTerm);
 }
