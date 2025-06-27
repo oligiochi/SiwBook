@@ -6,27 +6,19 @@ import it.uniroma3.siwbooks.dto.GenreDto;
 import it.uniroma3.siwbooks.models.*;
 import it.uniroma3.siwbooks.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,7 +35,7 @@ public class LibriController {
     @Autowired
     private AutoreService autoreService;
     @Autowired
-    private RecensioneService RecensioneService;
+    private RecensioneService recensioneService;
     @Autowired
     private UtenteService userService;
     @Autowired
@@ -66,15 +58,13 @@ public class LibriController {
             @RequestParam(defaultValue = "0") int page,
             Model model
     ) {
-        Sort sort = this.buildSort(sortBy);
+        Sort sort = buildSort(sortBy);
         Pageable pageable = PageRequest.of(page, 8, sort);
 
         Page<Books> bookPage = bookService.searchBooks(
                 searchTerm, genreID, startDate, endDate, sort, pageable);
 
-        // Trasforma direttamente in DTO
-
-        List<BookInfoDto> dtos=buildBookInfo(bookPage);
+        List<BookInfoDto> dtos = buildBookInfo(bookPage);
         model.addAttribute("books", dtos);
         model.addAttribute("page", bookPage);
         model.addAttribute("totalCount", bookPage.getTotalElements());
@@ -85,195 +75,129 @@ public class LibriController {
     }
 
     @GetMapping("/book/{id}")
-    public String getBook(
-            @PathVariable("id") Long id,
-            Model model) {
-
-        // 1) prendi tutte le recensioni del libro
-        List<Recensione> allReviews = RecensioneService.getBookReviews(id);
-        List<Long> imageIds=bookService.getImageSummariesForBook(id);
-        if(!imageIds.isEmpty()) {
-            imageIds.removeFirst();
+    public String getBook(@PathVariable("id") Long id, Model model) {
+        Books book = bookService.findById(id);
+        if (book == null) {
+            return "redirect:/books";
         }
-        // 2) utente corrente
+
+        // Ottieni recensioni ordinate
+        List<Recensione> allReviews = recensioneService.getBookReviews(id);
         Utente currentUser = userService.getCurrentUser();
 
-        List<Recensione> sortedReviews = allReviews.stream()
-                .sorted(Comparator.comparing(
-                        r -> !(currentUser != null && r.getAuthor().equals(currentUser))
-                ))
-                .collect(Collectors.toList());
+        List<Recensione> sortedReviews = sortReviewsByCurrentUser(allReviews, currentUser);
+        boolean hasUserReview = hasCurrentUserReview(sortedReviews, currentUser);
 
-        boolean hasUserReview = !sortedReviews.isEmpty() && sortedReviews.getFirst().getAuthor().equals(currentUser);
+        // Ottieni immagini del libro
+        List<Long> imageIds = bookService.getImageSummariesForBook(id);
+        if (!imageIds.isEmpty()) {
+            imageIds.removeFirst();
+        }
 
-        // 4) aggiungi al modello
-        model.addAttribute("book",        bookService.findById(id));
-        model.addAttribute("hasUserReview",  hasUserReview);
-        model.addAttribute("bookReviews",  sortedReviews);
-        model.addAttribute("imageIds",  imageIds);
-        model.addAttribute("isEditMode", false);
+        model.addAttribute("book", book);
+        model.addAttribute("hasUserReview", hasUserReview);
+        model.addAttribute("bookReviews", sortedReviews);
+        model.addAttribute("imageIds", imageIds);
+
         return "book";
     }
 
     @GetMapping("/admin/book/add")
     public String showAddBookForm(Model model) {
-        model.addAttribute("authors", autoreService.findAll()); // List<Author>
-        model.addAttribute("genres", genereService.findAll());   // List<Genre>
-        model.addAttribute("book", new Books());
-        model.addAttribute("isEditMode", false);
-        model.addAttribute("formAction", "/admin/book/add");
+        if (!isIsAdmin()) {
+            return "redirect:/";
+        }
 
-        return "FormBook"; // oppure il nome effettivo del file Thymeleaf
+        prepareFormData(model, new Books(), null, false);
+        model.addAttribute("formAction", "/admin/book/add");
+        return "FormBook";
     }
 
     @PostMapping("/admin/book/add")
     public String addBook(@ModelAttribute("book") Books book,
                           BindingResult bindingResult,
-
                           @RequestParam(value = "releaseDate", required = false) String releaseDateString,
                           @RequestParam(value = "author", required = false) String authorsCsv,
                           @RequestParam(value = "generi", required = false) String genresCsv,
                           @RequestParam(value = "imageIds", required = false) String imageIds,
                           @RequestParam(value = "removeImageIds", required = false) List<Long> removeImageIds,
-
                           RedirectAttributes redirectAttributes,
                           Model model) {
 
-        // Gestione manuale di releaseDate
-        if (releaseDateString != null && !releaseDateString.isBlank()) {
-            try {
-                LocalDate date = LocalDate.parse(releaseDateString);
-                book.setReleaseDate(date.atStartOfDay());
-            } catch (DateTimeParseException e) {
-                bindingResult.rejectValue("releaseDate", "error.date", "Formato data non valido");
-            }
-        } else {
-            bindingResult.rejectValue("releaseDate", "error.required", "Data di pubblicazione obbligatoria");
-        }
-
-        // Gestione manuale degli autori
-        List<Autore> selectedAuthors = new ArrayList<>();
-        if (authorsCsv != null && !authorsCsv.isBlank()) {
-            try {
-                selectedAuthors = Arrays.stream(authorsCsv.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(Long::parseLong)
-                        .map(autoreService::findById)
-                        .collect(Collectors.toList());
-                book.setAuthor(selectedAuthors);
-            } catch (NumberFormatException e) {
-                bindingResult.rejectValue("author", "error.format", "Formato autori non valido");
-            }
-        } else {
-            bindingResult.rejectValue("author", "error.required", "Almeno un autore è obbligatorio");
-        }
-
-        // Gestione manuale dei generi
-        List<Genere> selectedGenres = new ArrayList<>();
-        if (genresCsv != null && !genresCsv.isBlank()) {
-            try {
-                selectedGenres = Arrays.stream(genresCsv.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(Long::parseLong)
-                        .map(genereService::findById)
-                        .collect(Collectors.toList());
-                book.setGeneri(selectedGenres);
-            } catch (NumberFormatException e) {
-                bindingResult.rejectValue("generi", "error.format", "Formato generi non valido");
-            }
-        } else {
-            bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
-        }
-
-        // Validazione del book
-        bookValidator.validate(book, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("authors", autoreService.findAll());
-            model.addAttribute("genres", genereService.findAll());
-            model.addAttribute("book", book);
-
-            List<Image> bookImages = new ArrayList<>();
-            List<String> ids = new ArrayList<>(List.of(imageIds.split(",")));
-            ids.removeFirst();
-
-            for (String id : ids)
-                bookImages.add(imageService.findById(Long.valueOf(id.trim())));
-            model.addAttribute("bookImages", bookImages);
-            //model.addAttribute("removeImageIds", removeImageIds);
-
-            return "FormBook";
-        }
-
         if (!isIsAdmin()) {
-            redirectAttributes.addFlashAttribute("error", "Non puoi Creare un libro. Solo admin!");
+            redirectAttributes.addFlashAttribute("error", "Non hai i permessi per creare un libro");
             return "redirect:/";
         }
 
         try {
+            // Validazione
+            validateBookData(book, releaseDateString, authorsCsv, genresCsv, bindingResult);
+            bookValidator.validate(book, bindingResult);
+
+            if (bindingResult.hasErrors()) {
+                prepareFormData(model, book, imageIds, false);
+                model.addAttribute("formAction", "/admin/book/add");
+                return "FormBook";
+            }
+
             // Salva il libro
             bookService.save(book);
 
-            // Associa immagini esistenti
-            if (imageIds != null && !imageIds.trim().isEmpty()) {
-                List<Long> imageIdList = Arrays.stream(imageIds.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(Long::valueOf)
-                        .collect(Collectors.toList());
-                imageService.associateImagesToBook(imageIdList, book.getId(), bookService);
-            }
-
-            // Elimina immagini rimosse
-            if (removeImageIds != null && !removeImageIds.isEmpty()) {
-                removeImageIds.forEach(imageService::deleteImage);
-            }
+            // Gestisci le immagini
+            handleImages(book.getId(), imageIds, removeImageIds);
 
             redirectAttributes.addFlashAttribute("success", "Libro aggiunto con successo!");
             return "redirect:/book/" + book.getId();
 
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Errore durante il salvataggio: " + e.getMessage());
+            prepareFormData(model, book, imageIds, false);
+            model.addAttribute("formAction", "/admin/book/add");
             return "FormBook";
         }
     }
 
-    @GetMapping("admin/deleteBook/{book_id}")
-    public String removeBook(@PathVariable Long book_id,RedirectAttributes redirectAttributes) {
-        if (isIsAdmin()) {
-            bookService.deleteBook(book_id);
-            redirectAttributes.addFlashAttribute("success", "Libro eliminato con successo!");
+    @GetMapping("/admin/deleteBook/{book_id}")
+    public String removeBook(@PathVariable Long book_id, RedirectAttributes redirectAttributes) {
+        if (!isIsAdmin()) {
+            redirectAttributes.addFlashAttribute("error", "Non hai i permessi per eliminare un libro");
             return "redirect:/books";
         }
-        redirectAttributes.addFlashAttribute("error", "Non eliminare questo libro. Solo admin!");
+
+        try {
+            bookService.deleteBook(book_id);
+            redirectAttributes.addFlashAttribute("success", "Libro eliminato con successo!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Errore durante l'eliminazione del libro");
+        }
+
         return "redirect:/books";
     }
 
-    @GetMapping("book/editBook/{book_id}")
+    @GetMapping("/admin/editBook/{book_id}")
     public String editBook(@PathVariable Long book_id, Model model) {
+        if (!isIsAdmin()) {
+            return "redirect:/";
+        }
+
         Books book = bookService.findById(book_id);
         if (book == null) {
             return "redirect:/books";
         }
 
-        // Carica le immagini esistenti
+        prepareFormData(model, book, null, true);
 
-
-        model.addAttribute("authors", autoreService.findAll());
-        model.addAttribute("genres", genereService.findAll());
-        model.addAttribute("book", book);
+        // Carica le immagini esistenti per l'edit
         List<Image> bookImages = imageService.findByBookId(book_id);
         model.addAttribute("bookImages", bookImages);
-        model.addAttribute("isEditMode", true);
-        model.addAttribute("formAction", "/book/editBook/"+book_id);
+        model.addAttribute("formAction", "/book/editBook/" + book_id);
 
         return "FormBook";
     }
 
-    @PostMapping("book/editBook/{book_id}")
+    @PostMapping("/book/editBook/{book_id}")
     public String updateBook(
+            @PathVariable Long book_id,
             @ModelAttribute("book") Books book,
             BindingResult bindingResult,
             @RequestParam(value = "releaseDate", required = false) String releaseDateString,
@@ -284,95 +208,49 @@ public class LibriController {
             RedirectAttributes redirectAttributes,
             Model model) {
 
-        // Flag edit mode
-        model.addAttribute("isEditMode", true);
-
-        // 1) Gestione releaseDate
-        if (releaseDateString != null && !releaseDateString.isBlank()) {
-            try {
-                LocalDate date = LocalDate.parse(releaseDateString);
-                book.setReleaseDate(date.atStartOfDay());
-            } catch (DateTimeParseException e) {
-                bindingResult.rejectValue("releaseDate", "error.date", "Formato data non valido");
-            }
-        } else {
-            bindingResult.rejectValue("releaseDate", "error.required", "Data di pubblicazione obbligatoria");
-        }
-
-        // 2) Gestione autori
-        if (authorsCsv != null && !authorsCsv.isBlank()) {
-            try {
-                List<Autore> authors = Arrays.stream(authorsCsv.split(","))
-                        .map(String::trim).filter(s -> !s.isEmpty())
-                        .map(Long::parseLong)
-                        .map(autoreService::findById)
-                        .collect(Collectors.toList());
-                book.setAuthor(authors);
-            } catch (NumberFormatException e) {
-                bindingResult.rejectValue("author", "error.format", "Formato autori non valido");
-            }
-        } else {
-            bindingResult.rejectValue("author", "error.required", "Almeno un autore è obbligatorio");
-        }
-
-        // 3) Gestione generi
-        if (genresCsv != null && !genresCsv.isBlank()) {
-            try {
-                List<Genere> generi = Arrays.stream(genresCsv.split(","))
-                        .map(String::trim).filter(s -> !s.isEmpty())
-                        .map(Long::parseLong)
-                        .map(genereService::findById)
-                        .collect(Collectors.toList());
-                book.setGeneri(generi);
-            } catch (NumberFormatException e) {
-                bindingResult.rejectValue("generi", "error.format", "Formato generi non valido");
-            }
-        } else {
-            bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
-        }
-
-        // Solo admin
         if (!isIsAdmin()) {
-            redirectAttributes.addFlashAttribute("error", "Non puoi modificare un libro. Solo admin!");
+            redirectAttributes.addFlashAttribute("error", "Non hai i permessi per modificare un libro");
             return "redirect:/";
         }
 
         try {
-            // Aggiorna il libro esistente
+            // Assicurati che l'ID sia corretto
+            book.setId(book_id);
+
+            // Validazione
+            validateBookData(book, releaseDateString, authorsCsv, genresCsv, bindingResult);
+
+            if (bindingResult.hasErrors()) {
+                prepareFormData(model, book, imageIds, true);
+                model.addAttribute("formAction", "/book/editBook/" + book_id);
+                return "FormBook";
+            }
+
+            // Aggiorna il libro
             bookService.update(book);
 
-            // Associa nuove immagini
-            if (imageIds != null && !imageIds.trim().isEmpty()) {
-                List<Long> newImageIds = Arrays.stream(imageIds.split(","))
-                        .map(String::trim).filter(s->!s.isEmpty())
-                        .map(Long::valueOf)
-                        .collect(Collectors.toList());
-                imageService.associateImagesToBook(newImageIds, book.getId(), bookService);
-            }
-
-            // Rimuovi immagini segnate
-            if (removeImageIdsCsv != null && !removeImageIdsCsv.isBlank()) {
-                List<Long> toRemove = Arrays.stream(removeImageIdsCsv.split(","))
-                        .map(String::trim).filter(s->!s.isEmpty())
-                        .map(Long::valueOf).collect(Collectors.toList());
-                toRemove.forEach(imageService::deleteImage);
-            }
+            // Gestisci le immagini
+            handleImages(book.getId(), imageIds, removeImageIdsCsv);
 
             redirectAttributes.addFlashAttribute("success", "Libro aggiornato con successo!");
             return "redirect:/book/" + book.getId();
 
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Errore durante l'aggiornamento: " + e.getMessage());
+            prepareFormData(model, book, imageIds, true);
+            model.addAttribute("formAction", "/book/editBook/" + book_id);
             return "FormBook";
         }
     }
+
+    // Metodi di utilità privati
 
     private Sort buildSort(String sortBy) {
         return switch(sortBy) {
             case "DATE_ASC"   -> Sort.by("releaseDate").ascending();
             case "TITLE"      -> Sort.by("title").ascending();
             case "TITLE_DESC" -> Sort.by("title").descending();
-            case "RATING"     -> Sort.by("popularity").descending();  // verifica che 'popularity' esista!
+            case "RATING"     -> Sort.by("popularity").descending();
             default           -> Sort.by("releaseDate").descending();
         };
     }
@@ -383,14 +261,13 @@ public class LibriController {
                         book.getId(),
                         book.getTitle(),
                         book.getReleaseDate(),
-                        bookService.AvgStar(book) // metodo sul service che riceve Books
+                        bookService.AvgStar(book)
                 ))
                 .collect(Collectors.toList());
     }
 
     private List<GenreDto> buildGenreList(Long selectedGenreId) {
-        var all = genereService.findAll();
-        return all.stream()
+        return genereService.findAll().stream()
                 .map(g -> new GenreDto(
                         g.getId().equals(selectedGenreId),
                         genereService.countLibriByGenere(g),
@@ -400,5 +277,165 @@ public class LibriController {
                 .collect(Collectors.toList());
     }
 
+    private List<Recensione> sortReviewsByCurrentUser(List<Recensione> reviews, Utente currentUser) {
+        if (currentUser == null) {
+            return reviews;
+        }
 
+        return reviews.stream()
+                .sorted(Comparator.comparing(
+                        r -> !r.getAuthor().equals(currentUser)
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private boolean hasCurrentUserReview(List<Recensione> sortedReviews, Utente currentUser) {
+        return currentUser != null &&
+                !sortedReviews.isEmpty() &&
+                sortedReviews.get(0).getAuthor().equals(currentUser);
+    }
+
+    private void validateBookData(Books book, String releaseDateString, String authorsCsv,
+                                  String genresCsv, BindingResult bindingResult) {
+        validateAndSetReleaseDate(book, releaseDateString, bindingResult);
+        validateAndSetAuthors(book, authorsCsv, bindingResult);
+        validateAndSetGenres(book, genresCsv, bindingResult);
+    }
+
+    private void validateAndSetReleaseDate(Books book, String releaseDateString, BindingResult bindingResult) {
+        if (releaseDateString == null || releaseDateString.isBlank()) {
+            bindingResult.rejectValue("releaseDate", "error.required", "Data di pubblicazione obbligatoria");
+            return;
+        }
+
+        try {
+            LocalDate date = LocalDate.parse(releaseDateString);
+            book.setReleaseDate(date.atStartOfDay());
+        } catch (DateTimeParseException e) {
+            bindingResult.rejectValue("releaseDate", "error.date", "Formato data non valido");
+        }
+    }
+
+    private void validateAndSetAuthors(Books book, String authorsCsv, BindingResult bindingResult) {
+        if (authorsCsv == null || authorsCsv.isBlank()) {
+            bindingResult.rejectValue("author", "error.required", "Almeno un autore è obbligatorio");
+            return;
+        }
+
+        try {
+            List<Long> authorIds = parseIds(authorsCsv);
+            List<Autore> authors = authorIds.stream()
+                    .map(autoreService::findById)
+                    .filter(Objects::nonNull) // Filtra autori null
+                    .collect(Collectors.toList());
+
+            if (authors.isEmpty()) {
+                bindingResult.rejectValue("author", "error.notfound", "Nessun autore valido trovato");
+                return;
+            }
+
+            book.setAuthor(authors);
+        } catch (NumberFormatException e) {
+            bindingResult.rejectValue("author", "error.format", "Formato autori non valido");
+        }
+    }
+
+    private void validateAndSetGenres(Books book, String genresCsv, BindingResult bindingResult) {
+        if (genresCsv == null || genresCsv.isBlank()) {
+            bindingResult.rejectValue("generi", "error.required", "Almeno un genere è obbligatorio");
+            return;
+        }
+
+        try {
+            List<Long> genreIds = parseIds(genresCsv);
+            List<Genere> genres = genreIds.stream()
+                    .map(genereService::findById)
+                    .filter(Objects::nonNull) // Filtra generi null
+                    .collect(Collectors.toList());
+
+            if (genres.isEmpty()) {
+                bindingResult.rejectValue("generi", "error.notfound", "Nessun genere valido trovato");
+                return;
+            }
+
+            book.setGeneri(genres);
+        } catch (NumberFormatException e) {
+            bindingResult.rejectValue("generi", "error.format", "Formato generi non valido");
+        }
+    }
+
+    private List<Long> parseIds(String csv) {
+        if (csv == null || csv.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+    }
+
+    private void handleImages(Long bookId, String imageIds, String removeImageIdsCsv) {
+        // Associa nuove immagini
+        if (imageIds != null && !imageIds.trim().isEmpty()) {
+            List<Long> newImageIds = parseIds(imageIds);
+            if (!newImageIds.isEmpty()) {
+                imageService.associateImagesToBook(newImageIds, bookId, bookService);
+            }
+        }
+
+        // Rimuovi immagini selezionate
+        if (removeImageIdsCsv != null && !removeImageIdsCsv.isBlank()) {
+            List<Long> imagesToRemove = parseIds(removeImageIdsCsv);
+            imagesToRemove.forEach(imageId -> {
+                try {
+                    imageService.deleteImage(imageId);
+                } catch (Exception e) {
+                    // Log dell'errore ma continua con le altre immagini
+                    System.err.println("Errore eliminando immagine " + imageId + ": " + e.getMessage());
+                }
+            });
+        }
+    }
+
+    private void handleImages(Long bookId, String imageIds, List<Long> removeImageIds) {
+        // Associa nuove immagini
+        if (imageIds != null && !imageIds.trim().isEmpty()) {
+            List<Long> newImageIds = parseIds(imageIds);
+            if (!newImageIds.isEmpty()) {
+                imageService.associateImagesToBook(newImageIds, bookId, bookService);
+            }
+        }
+
+        // Rimuovi immagini selezionate
+        if (removeImageIds != null && !removeImageIds.isEmpty()) {
+            removeImageIds.forEach(imageId -> {
+                try {
+                    imageService.deleteImage(imageId);
+                } catch (Exception e) {
+                    System.err.println("Errore eliminando immagine " + imageId + ": " + e.getMessage());
+                }
+            });
+        }
+    }
+
+    private void prepareFormData(Model model, Books book, String imageIds, boolean isEditMode) {
+        model.addAttribute("authors", autoreService.findAll());
+        model.addAttribute("genres", genereService.findAll());
+        model.addAttribute("book", book);
+        model.addAttribute("isEditMode", isEditMode);
+
+        // Gestione immagini del libro per il form di aggiunta
+        if (imageIds != null && !imageIds.trim().isEmpty()) {
+            List<Long> imageIdList = parseIds(imageIds);
+            if (!imageIdList.isEmpty()) {
+                List<Image> bookImages = imageIdList.stream()
+                        .map(imageService::findById)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                model.addAttribute("bookImages", bookImages);
+            }
+        }
+    }
 }
