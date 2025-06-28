@@ -2,6 +2,7 @@ package it.uniroma3.siwbooks.controller;
 
 import it.uniroma3.siwbooks.dto.AuthorDto;
 import it.uniroma3.siwbooks.dto.BookInfoDto;
+import it.uniroma3.siwbooks.dto.ImageDto;
 import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.service.AutoreService;
@@ -17,10 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.print.Book;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -161,6 +159,115 @@ public class AutoriController {
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Errore durante la creazione dell'autore: " + e.getMessage());
             model.addAttribute("booksList", bookService.findAll());
+            return "authorForm";
+        }
+    }
+
+    @GetMapping("/admin/author/edit/{id}")
+    public String showEditForm(
+            @PathVariable("id") Long id,
+            Model model
+    ) {
+        // Carica l'entità Autore
+        Autore existing = autoreService.findByIdOp(id)
+                .orElseThrow(() -> new NoSuchElementException("Autore non trovato: " + id));;
+
+        // Converte in DTO
+        AuthorDto dto = new AuthorDto();
+        dto.setId(existing.getId());
+        dto.setNome(existing.getNome());
+        dto.setCognome(existing.getCognome());
+        dto.setNationality(existing.getNationality());
+        if (existing.getDateOfBirth() != null) {
+            dto.setDateOfBirth(existing.getDateOfBirth().toLocalDate());
+            dto.setDateOfBirthStr(existing.getDateOfBirth().toLocalDate().toString());
+        }
+        if (existing.getDateOfDeath() != null) {
+            dto.setDateOfDeath(existing.getDateOfDeath().toLocalDate());
+            dto.setDateOfDeathStr(existing.getDateOfDeath().toLocalDate().toString());
+        }
+        dto.setBooks(existing.getLibri());
+        if (existing.getImages() != null) {
+            // se hai un solo ImageDto
+            dto.setImages(new ImageDto(
+                    existing.getImages().getId(),
+                    existing.getImages().getFileName(),
+                    existing.getImages().getOriginalFileName(),
+                    "/images/"+existing.getImages().getId(),
+                    existing.getImages().getFileSize(),
+                    existing.getImages().getContentType()
+            ));
+        }
+
+        // Prepara la lista degli ID già selezionati
+        List<Long> selectedBookIds = dto.getBooks().stream()
+                .map(Books::getId)
+                .toList();
+
+        model.addAttribute("autore", dto);
+        model.addAttribute("booksList", bookService.findAll());
+        model.addAttribute("selectedBookIds", selectedBookIds);
+        model.addAttribute("formAction", "/admin/author/edit/" + id);
+        model.addAttribute("isEditMode", true);
+        return "authorForm";
+    }
+
+    // --- POST per salvare le modifiche ---
+    @PostMapping("/admin/author/edit/{id}")
+    public String updateAuthor(
+            @PathVariable("id") Long id,
+            @Valid @ModelAttribute("autore") AuthorDto authorDto,
+            BindingResult bindingResult,
+            @RequestParam(value = "bookIds", required = false) String bookIds,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+            Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("booksList", bookService.findAll());
+            model.addAttribute("selectedBookIds",
+                    bookIds == null ? List.of() :
+                            Arrays.stream(bookIds.split(",")).map(Long::parseLong).toList()
+            );
+            model.addAttribute("formAction", "/admin/author/edit/" + id);
+            model.addAttribute("isEditMode", true);
+            return "authorForm";
+        }
+
+        try {
+            // Parsing date
+            if (authorDto.getDateOfBirthStr() != null && !authorDto.getDateOfBirthStr().isEmpty()) {
+                authorDto.setDateOfBirth(LocalDate.parse(authorDto.getDateOfBirthStr()));
+            }
+            if (authorDto.getDateOfDeathStr() != null && !authorDto.getDateOfDeathStr().isEmpty()) {
+                authorDto.setDateOfDeath(LocalDate.parse(authorDto.getDateOfDeathStr()));
+            }
+
+            // Libri associati
+            List<Long> bookIdList = bookIds == null || bookIds.isEmpty()
+                    ? List.of()
+                    : Arrays.stream(bookIds.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .toList();
+            Iterable<Books> booksIt = bookService.findByIds(bookIdList);
+            List<Books> booksList = new ArrayList<>();
+            booksIt.forEach(booksList::add);
+            authorDto.setBooks(booksList);
+
+            // Chiama il service che già gestisce create/update
+            autoreService.saveAuthor(authorDto, imageFile);
+
+            return "redirect:/authors";  // o dove elenchi gli autori
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Errore durante l'aggiornamento: " + e.getMessage());
+            model.addAttribute("booksList", bookService.findAll());
+            model.addAttribute("selectedBookIds",
+                    bookIds == null ? List.of() :
+                            Arrays.stream(bookIds.split(",")).map(Long::parseLong).toList()
+            );
+            model.addAttribute("formAction", "/admin/author/edit/" + id);
+            model.addAttribute("isEditMode", true);
             return "authorForm";
         }
     }

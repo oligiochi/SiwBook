@@ -53,7 +53,7 @@
                 </div>
                 <div class="autor-action" sec:authorize="hasAuthority('ADMIN')">
                     <div class="autor-action-item edit">
-                        <a class="btn btn-primary" th:href="@{'#'}" title="Modifica">
+                        <a class="btn btn-primary" th:href="@{/admin/author/edit/{id}(id=${autore.id})}" title="Modifica">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
                     </div>

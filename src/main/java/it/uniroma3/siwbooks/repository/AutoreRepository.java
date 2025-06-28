@@ -27,7 +27,7 @@ public interface AutoreRepository extends CrudRepository<it.uniroma3.siwbooks.mo
     List<Autore> searchByTerm(@Param("searchTerm") String searchTerm);
 
     @Modifying
-    @Query(value = "DELETE FROM book_authors WHERE authors_id = :authors_id", nativeQuery = true)
-    void deleteAllBookFromAuthor(@Param("authors_id") Long authors_id);
+    @Query(value = "DELETE FROM books_author WHERE author_id = :authorId", nativeQuery = true)
+    void deleteAllBookFromAuthor(@Param("authorId") Long authorId);
 
 }

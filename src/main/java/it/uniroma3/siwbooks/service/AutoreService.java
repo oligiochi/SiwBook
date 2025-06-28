@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 //@Transactional
@@ -31,6 +32,9 @@ public class AutoreService {
         return repository.findById(id).orElse(null);
     }
 
+    public Optional<Autore> findByIdOp(Long id) {
+        return repository.findById(id);
+    }
     public Iterable<Autore> findAll() {
         return repository.findAll();
     }
