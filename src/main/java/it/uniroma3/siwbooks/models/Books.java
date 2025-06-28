@@ -3,6 +3,7 @@ package it.uniroma3.siwbooks.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class Books {
     @ManyToMany
     private List<Genere> generi;
     @NotNull
+    @PastOrPresent(message = "La releaseDate deve essere nel passato al massimo presente")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime releaseDate;
 

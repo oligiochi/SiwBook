@@ -200,4 +200,7 @@ public class BookService {
     public void deleteBook(Long bookId) {
         bookRepository.deleteById(bookId);
     }
+    public Iterable<Books> findAll() {
+        return bookRepository.findAll();
+    }
 }

@@ -2,6 +2,7 @@ package it.uniroma3.siwbooks.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.PastOrPresent;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -25,11 +26,11 @@ public class Autore {
     private List<Books>Libri;
 
     @NotNull
-    @PastOrPresent(message = "{dateOfBirth.pastOrPresent}")
+    @Past(message = "La Data deve essere al passato")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime dateOfBirth;
 
-    @PastOrPresent(message = "{dateOfDeath.pastOrPresent}")
+    @Past(message = "La Data deve essere al passato")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime dateOfDeath;
     @NotNull

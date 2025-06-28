@@ -24,6 +24,17 @@ body {
 .top-bar-section {
     background-color: #ffffff;
 }
+.author-link {
+    color: inherit;             /* Nessun blu */
+    text-decoration: none;      /* Nessuna sottolineatura */
+    transition: color 0.2s ease;
+}
+
+.author-link:hover {
+    color: #ffcc00;
+    border-bottom: 2px solid #ffcc00;
+}
+
 
 .book-details-section {
     padding: 3rem 0;

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${autore.nome + ' ' + autore.cognome+' - Profilo Autore'}">Leo Tolstoj - Profilo Autore</title>
+    <link rel="stylesheet" href="/css/autore.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Top Navigation Bar -->
+<div th:insert="~{fragments/topBar :: site-header}"></div>
+
+
+<!-- Author Details Section -->
+<section class="author-details-section">
+    <div class="container">
+        <div class="author-card">
+            <div class="author-header">
+                <img th:src="@{'/images/author/' + ${autore.id}}"
+                     alt="Copertina del libro"
+                     onerror="this.onerror=null;this.src='images/book_cover_placeholder2.png';"
+                     class="author-portrait"
+                >
+                <div class="author-details">
+                    <h1 class="author-name" th:text="${autore.nome + ' ' + autore.cognome}">Leo Tolstoj</h1>
+
+                    <div class="author-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Nascita</span>
+                            <!-- assume autore.dataNascita è un oggetto LocalDate/Date -->
+                            <span class="meta-value birth-date" th:text="${#temporals.format(autore.dateOfBirth, 'yyyy-MM-dd')}"></span>
+
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Morte</span>
+                            <span class="meta-value death-date" th:text="${#temporals.format(autore.dateOfDeath, 'yyyy-MM-dd')}"></span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Nazionalit&agrave</span>
+                            <span class="meta-value"
+                                  th:text="${autore.nationality}">Russa
+                            </span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Opere</span>
+                            <!-- qui presumo che tu abbia una proprietà numeroOpere o una lista `autore.opere` -->
+                            <span class="meta-value"
+                                  th:text="${totalCount}">28
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="autor-action" sec:authorize="hasAuthority('ADMIN')">
+                    <div class="autor-action-item edit">
+                        <a class="btn btn-primary" th:href="@{'#'}" title="Modifica">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <div class="autor-action-item delete">
+                        <a class="btn btn-primary" th:href="@{/admin/deleteAuthor/{id}(id=${autore.id})}" title="Elimina">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- Author Books Section -->
+<section class="author-books-section">
+    <div class="container">
+        <div class="books-section">
+            <h2 class="section-title">
+                <i class="fas fa-book"></i> Opere Principali
+            </h2>
+            <div th:insert="~{fragments/gridbook :: bookGrid(books=${books}, totalCount=${totalCount}, page=${page})}"></div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

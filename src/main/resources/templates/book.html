@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${book.title} + ' – Dettagli'">Dettaglio libro</title>
-    <link rel="stylesheet" href="/css/styles2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/book.css">
 </head>
@@ -21,9 +20,11 @@
                 <div class="book-details">
                     <h1 class="book-title" th:text="${book.title}">Titolo</h1>
                     <div class="book-author">
-                            <span th:each="a, iterStat : ${book.author}"
-                                  th:text="${a.nome} + ' ' + ${a.cognome} + ${iterStat.last ? '' : ', '}">
-                                Autore
+                            <span th:each="a, iterStat : ${book.author}">
+                                <a
+                                  class="author-link"
+                                  th:text="${a.nome} + ' ' + ${a.cognome} + ${iterStat.last ? '' : ', '}"
+                                  th:href="@{/author/{id}(id=${a.id})}"></a><span th:if="${!iterStat.last}">, </span>
                             </span>
                     </div>
                     <div class="book-tags">

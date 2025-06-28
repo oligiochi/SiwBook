@@ -54,4 +54,10 @@ public class AutoreService {
     public List<Autore> searchByTerm(String term) {
         return repository.searchByTerm(term);
     }
+
+    @Transactional
+    public void deleteAuthor(Long id) {
+        repository.deleteAllBookFromAuthor(id);
+        repository.deleteById(id);
+    }
 }
