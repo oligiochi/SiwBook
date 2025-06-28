@@ -203,4 +203,11 @@ public class BookService {
     public Iterable<Books> findAll() {
         return bookRepository.findAll();
     }
+
+    public Iterable<Books> findByIds(List<Long> bookIdList) {
+        if (bookIdList == null || bookIdList.isEmpty()) {
+            return List.of();
+        }
+        return bookRepository.findAllById(bookIdList);
+    }
 }

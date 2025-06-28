@@ -27,6 +27,9 @@ public class BookInfoDto {
         this.star = star;
     }
 
+    public BookInfoDto(boolean id, String title, LocalDateTime releaseDate, Double aDouble) {
+    }
+
     public Long getId() {
         return id;
     }

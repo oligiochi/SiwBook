@@ -1,61 +1,60 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title th:text="${isEditMode} ? 'Modifica Autore' : 'Aggiungi Autore'">Aggiungi Autore</title>
-    <link rel="stylesheet" th:href="@{/css/autoreForm.css}">
-    <link rel="stylesheet" th:href="@{/css/errors.css}">
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        // Lista passata dal back-end
-        var books = /*[[${booksList}]]*/ [];
-        /*]]>*/
-    </script>
+    <link rel="stylesheet" href="/css/autoreForm.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-<div th:insert="~{fragments/topBar :: site-header}"></div>
-
 <div class="warped_box_for_card">
     <div class="author-form-card">
+        <!-- Icona e titolo -->
         <div class="icon-container">
-            <div class="author-icon"><i class="fas fa-user-pen"></i></div>
+            <div class="author-icon">
+                <i class="fas fa-user-pen"></i>
+            </div>
         </div>
         <div class="title-section">
-            <h1 th:text="${isEditMode} ? 'Modifica Autore' : 'Aggiungi Nuovo Autore'"></h1>
-            <p class="subtitle"
-               th:text="${isEditMode} ? 'Aggiorna l\'autore esistente' : 'Compila i campi per un nuovo autore'"></p>
+            <h1 th:text="${isEditMode} ? 'Modifica Autore' : 'Aggiungi Nuovo Autore'">Aggiungi Nuovo Autore</h1>
+            <p class="subtitle">Compila tutti i campi per inserire un nuovo autore nel catalogo</p>
         </div>
 
-        <form id="authorForm"
-              th:action="@{${formAction}}"
-              th:object="${autore}"
-              method="post"
-              enctype="multipart/form-data">
+        <form id="authorForm" th:action="@{${formAction}}" method="post" enctype="multipart/form-data" th:object="${autore}">
+            <input type="hidden" th:if="${autore.id != null}" th:field="*{id}" />
 
-            <!-- Nome / Cognome / Nazionalità / Date -->
+            <!-- Nome e Cognome -->
             <div class="flex-row">
-                <div class="form-group flex-col"><label for="nome">Nome *</label>
-                    <input id="nome" th:field="*{nome}" class="input" required>
-                    <div class="error-message" th:errors="*{nome}"></div>
+                <div class="form-group flex-col">
+                    <label for="nome">Nome *</label>
+                    <input type="text" id="nome" class="input" th:field="*{nome}" placeholder="Inserisci il nome" required />
+                    <div class="error-message" id="nome-error"></div>
                 </div>
-                <div class="form-group flex-col"><label for="cognome">Cognome *</label>
-                    <input id="cognome" th:field="*{cognome}" class="input" required>
-                    <div class="error-message" th:errors="*{cognome}"></div>
+                <div class="form-group flex-col">
+                    <label for="cognome">Cognome *</label>
+                    <input type="text" id="cognome" class="input" th:field="*{cognome}" placeholder="Inserisci il cognome" required />
+                    <div class="error-message" id="cognome-error"></div>
                 </div>
             </div>
-            <div class="form-group"><label for="nationality">Nazionalità *</label>
-                <input id="nationality" th:field="*{nationality}" class="input" required>
-                <div class="error-message" th:errors="*{nationality}"></div>
+
+            <!-- Nazionalità -->
+            <div class="form-group">
+                <label for="nazionalita">Nazionalit&agrave *</label>
+                <input type="text" id="nazionalita" class="input" th:field="*{nationality}" placeholder="Inserisci la nazionalit&agrave" required />
+                <div class="error-message" id="nazionalita-error"></div>
             </div>
+
+            <!-- Date di nascita e morte -->
             <div class="flex-row">
-                <div class="form-group flex-col"><label for="dateOfBirth">Nascita *</label>
-                    <input type="datetime-local" id="dateOfBirth" th:field="*{dateOfBirth}" class="input" required>
-                    <div class="error-message" th:errors="*{dateOfBirth}"></div>
+                <div class="form-group flex-col">
+                    <label for="dataNascita">Data di Nascita *</label>
+                    <input type="date" id="dataNascita" class="input" th:value="${#temporals.format(autore.dateOfBirth, 'yyyy-MM-dd')}" name="dateOfBirth" required />
+                    <div class="error-message" id="dataNascita-error"></div>
                 </div>
-                <div class="form-group flex-col"><label for="dateOfDeath">Morte</label>
-                    <input type="datetime-local" id="dateOfDeath" th:field="*{dateOfDeath}" class="input">
-                    <div class="error-message" th:errors="*{dateOfDeath}"></div>
+                <div class="form-group flex-col">
+                    <label for="dataMorte">Data di Morte</label>
+                    <input type="date" id="dataMorte" class="input" th:value="${autore.dateOfDeath != null} ? ${#temporals.format(autore.dateOfDeath, 'yyyy-MM-dd')} : ''" name="dateOfDeath" />
                 </div>
             </div>
 
@@ -63,23 +62,22 @@
             <div class="form-group multi-select-container">
                 <label for="bookInput">Libri Associati</label>
                 <div class="selected-items" id="selectedBooks"></div>
-                <input type="hidden" id="libriField" th:field="*{libri}">
-                <input type="text" id="bookInput" class="input" placeholder="Cerca o aggiungi..."
-                       autocomplete="off">
-                <div class="dropdown" id="bookDropdown"></div>
-                <div class="error-message" th:errors="*{libri}"></div>
+                <input type="text" id="bookInput" class="input" placeholder="Cerca o aggiungi un libro..." autocomplete="off" />
+                <input type="hidden" id="booksField" name="bookIds" th:value="${#strings.arrayJoin(selectedBookIds, ',')}" />
+                <div class="dropdown" id="bookDropdown">
+                    <div th:each="book : ${booksList}" class="dropdown-item" th:text="${book.title}" th:attr="data-id=${book.id}"></div>
+                </div>
             </div>
 
-            <!-- Immagine -->
+            <!-- Immagine dell'autore -->
             <div class="form-group image-upload-container" id="imageUploadContainer">
-                <label>Immagine Autore</label>
-                <input type="file" id="imageUpload" name="images" accept="image/*" style="display:none;">
+                <label>Immagine dell'Autore</label>
+                <input type="file" id="imageUpload" name="image" accept="image/*" hidden />
                 <button type="button" id="uploadTrigger" class="btn submit-btn">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span th:text="${isEditMode} ? 'Cambia Immagine' : 'Carica Immagine'"></span>
+                    <i class="fas fa-cloud-upload-alt"></i> Carica Immagine
                 </button>
-                <p class="subtitle">Trascina o clicca per selezionare</p>
-                <div class="image-preview-container" id="imagePreview"></div>
+                <p class="image-hint">Trascina l'immagine qui o clicca per selezionare</p>
+                <div class="image-preview-container" id="imagePreview" th:attr="data-existing-image-ids=${autore.images != null ? autore.images.id : ''}"></div>
                 <div class="error-message" id="image-error"></div>
             </div>
 
@@ -87,97 +85,16 @@
             <div class="btn-container">
                 <button type="submit" class="btn submit-btn">
                     <i class="fas fa-paper-plane"></i>
-                    <span th:text="${isEditMode} ? 'Aggiorna' : 'Salva'"></span>
+                    <span th:text="${isEditMode} ? 'Aggiorna Autore' : 'Salva Autore'">Salva Autore</span>
                 </button>
-                <button type="reset" class="btn reset-btn"><i class="fas fa-undo"></i> Azzera</button>
+                <button type="reset" class="btn reset-btn">
+                    <i class="fas fa-undo"></i> Azzera
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-<script>
-    // JS identico a prima, ripristinato per libri+immagini
-    let selectedBooks = [], selectedImage = null;
-    document.addEventListener('DOMContentLoaded', () => {
-        // libro dropdown
-        const dd = document.getElementById('bookDropdown');
-        function renderDropdown() {
-            dd.innerHTML = '';
-            books.forEach(b => {
-                const d = document.createElement('div');
-                d.className = 'dropdown-item';
-                d.textContent = b.title || b;  // se b è string o obj
-                d.dataset.id = b.id||b;
-                d.addEventListener('mousedown', () => selectBook(d.dataset.id, d.textContent));
-                dd.appendChild(d);
-            });
-        }
-        renderDropdown();
-        document.getElementById('bookInput').addEventListener('input', () => {
-            const v = bookInput.value.toLowerCase();
-            dd.querySelectorAll('.dropdown-item').forEach(it => {
-                it.style.display = it.textContent.toLowerCase().includes(v) ? 'block' : 'none';
-            });
-            dd.style.display = v? 'block':'none';
-        });
-        function selectBook(id, title) {
-            if (!selectedBooks.find(x=>x.id==id)) {
-                selectedBooks.push({id, title});
-                updateSelected();
-            }
-            bookInput.value=''; dd.style.display='none';
-        }
-        function updateSelected() {
-            const cont = document.getElementById('selectedBooks');
-            cont.innerHTML = '';
-            selectedBooks.forEach(x=>{
-                const div = document.createElement('div');
-                div.className='selected-item';
-                div.innerHTML = `${x.title} <button class="remove-item">&times;</button>`;
-                div.querySelector('button').onclick = () => {
-                    selectedBooks = selectedBooks.filter(y=>y.id!=x.id);
-                    updateSelected();
-                };
-                cont.appendChild(div);
-            });
-            // aggiorna hidden
-            libriField.value = selectedBooks.map(x=>x.id).join(',');
-        }
-
-        // immagine upload + drag&drop
-        const uploadBtn = document.getElementById('uploadTrigger'),
-            fileIn = document.getElementById('imageUpload'),
-            drop = document.getElementById('imageUploadContainer'),
-            preview = document.getElementById('imagePreview'),
-            err = document.getElementById('image-error');
-        uploadBtn.onclick = () => fileIn.click();
-        fileIn.onchange = e => handleFile(e.target.files[0]);
-        ['dragover','drop','dragleave'].forEach(ev=>{
-            drop.addEventListener(ev, e=>{
-                e.preventDefault(); e.stopPropagation();
-                if(ev=='drop') handleFile(e.dataTransfer.files[0]);
-            });
-        });
-        function handleFile(f){
-            if (!f || !f.type.startsWith('image/')) {
-                err.textContent='File non valido'; return;
-            }
-            preview.innerHTML='';
-            const r=new FileReader();
-            r.onload=e=>{
-                const img=document.createElement('img');
-                img.className='image-preview'; img.src=e.target.result;
-                const rem=document.createElement('div');
-                rem.className='remove-image'; rem.innerHTML='&times;';
-                rem.onclick=()=>{preview.innerHTML=''; fileIn.value='';};
-                const c=document.createElement('div');
-                c.className='image-actions'; c.append(img,rem);
-                preview.appendChild(c);
-            };
-            r.readAsDataURL(f);
-        }
-    });
-</script>
+<script src="/js/author-form.js"></script>
 </body>
 </html>

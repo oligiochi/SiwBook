@@ -1,19 +1,24 @@
 package it.uniroma3.siwbooks.controller;
 
+import it.uniroma3.siwbooks.dto.AuthorDto;
 import it.uniroma3.siwbooks.dto.BookInfoDto;
 import it.uniroma3.siwbooks.models.Autore;
 import it.uniroma3.siwbooks.models.Books;
 import it.uniroma3.siwbooks.service.AutoreService;
 import it.uniroma3.siwbooks.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Book;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,12 +102,67 @@ public class AutoriController {
         autoreService.deleteAuthor(author_id);
         return "redirect:/authors";
     }
-    @GetMapping("authors/form")
+
+    @GetMapping("/admin/author/add")
     public String showCreateForm(Model model) {
-        model.addAttribute("autore", new Autore());
+        AuthorDto autore = new AuthorDto();
+        model.addAttribute("autore", autore);
         model.addAttribute("booksList", bookService.findAll());
-        model.addAttribute("formAction", "/authors");
+        List<Long> selectedBookIds=new ArrayList<>();
+
+        model.addAttribute("selectedBookIds", selectedBookIds);
+        model.addAttribute("formAction", "/admin/author/add");
         model.addAttribute("isEditMode", false);
         return "authorForm";
     }
+
+    @PostMapping("/admin/author/add")
+    public String createAuthor(
+            @Valid @ModelAttribute("autore") AuthorDto authorDto,
+            BindingResult bindingResult,
+            @RequestParam(value = "bookIds", required = false) String bookIds,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+            Model model
+    ) {
+
+        if (bindingResult.hasErrors()) {
+            // Ricarica dati necessari per la view
+            model.addAttribute("booksList", bookService.findAll());
+            return "authorForm";  // nome della view Thymeleaf del form autore
+        }
+
+        try {
+            // Parsing date (se il binding non lo fa già)
+            if (authorDto.getDateOfBirthStr() != null && !authorDto.getDateOfBirthStr().isEmpty()) {
+                authorDto.setDateOfBirth(LocalDate.parse(authorDto.getDateOfBirthStr()));
+            }
+            if (authorDto.getDateOfDeathStr() != null && !authorDto.getDateOfDeathStr().isEmpty()) {
+                authorDto.setDateOfDeath(LocalDate.parse(authorDto.getDateOfDeathStr()));
+            }
+
+            // Caricamento libri associati (se presenti)
+            List<Long> bookIdList = bookIds == null || bookIds.isEmpty()
+                    ? List.of()
+                    : Arrays.stream(bookIds.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+
+            Iterable<Books> books = bookService.findByIds(bookIdList);
+            List<Books> booksList = new ArrayList<>();
+            books.forEach(booksList::add);
+            authorDto.setBooks(booksList);
+
+            // Salvataggio autore con immagine
+            autoreService.saveAuthor(authorDto, imageFile);
+
+            return "redirect:/authors";  // reindirizza lista autori dopo salvataggio
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Errore durante la creazione dell'autore: " + e.getMessage());
+            model.addAttribute("booksList", bookService.findAll());
+            return "authorForm";
+        }
+    }
+
 }
