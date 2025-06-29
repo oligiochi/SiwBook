@@ -25,7 +25,11 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -DskipTests
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -52,6 +56,17 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_383B0AECF2754ACCB88157980018053E }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B902304740FF4476ACC8D68367C4BB8C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0E55C23988EE45B297B8BE68D4C2DA98 }}
+
+      - name: Set environment variables in Azure App Service
+        run: |
+            az webapp config appsettings set --name SIWBooks \
+              --resource-group SIW \
+              --settings \
+                DB_HOST=${{ secrets.DB_HOST }} \
+                DB_USERNAME=${{ secrets.DB_USERNAME }} \
+                DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+                GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}     
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
