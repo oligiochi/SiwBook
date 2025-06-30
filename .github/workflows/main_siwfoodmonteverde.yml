@@ -4,9 +4,6 @@
 name: Build and deploy JAR app to Azure Web App - SiwFoodMonteVerde
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -59,14 +56,16 @@ jobs:
 
       - name: Set environment variables in Azure App Service
         run: |
-            az webapp config appsettings set --name SIWBooks \
-              --resource-group SIW \
+            az webapp config appsettings set --name SiwFoodMonteVerde \
+              --resource-group MonteVerdeStudios \
               --settings \
                 DB_HOST=${{ secrets.DB_HOST }} \
                 DB_USERNAME=${{ secrets.DB_USERNAME }} \
                 DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
                 GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-                GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}     
+                GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
+                GIT_CLIENT_ID=${{ secrets.GIT_CLIENT_ID }} \
+                GIT_CLIENT_SECRET=${{ secrets.GIT_CLIENT_SECRET }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
