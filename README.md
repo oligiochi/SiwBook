@@ -146,15 +146,3 @@ Gestione di libri, autori e recensioni con ruoli differenziati per gli utenti.
 - Bootstrap
 
 ---
-
-## 🧪 Esecuzione Locale
-
-```bash
-# Clona il progetto
-git clone https://github.com/tuo-username/siwbooks.git
-
-# Entra nella cartella del progetto
-cd siwbooks
-
-# Esegui l'applicazione
-./mvnw spring-boot:run
