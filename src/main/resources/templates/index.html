@@ -1,20 +1,88 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>SIWBooks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digitale | Leggi, Esplora, Scopri</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/myindex.css">
 </head>
 <body>
-
+<!-- Navbar -->
 <div th:insert="~{fragments/topBar :: site-header}"></div>
 
-<main>
-    <section>
-        <h2>Benvenuto!</h2>
-        <p>Scopri i nostri libri e autori.</p>
-    </section>
-</main>
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Esplora mondi infiniti tra le pagine</h1>
+            <p>Scopri la nostra vasta collezione di libri digitali, classici senza tempo e nuove uscite. La lettura non &egrave; mai stata cos&igrave; accessibile.</p>
+            <div class="hero-buttons">
+                <a href="/books" class="btn btn-primary">Esplora il Catalogo</a>
+                <a href="/register" class="btn btn-secondary">Unisciti a Noi</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=800" alt="Collezione di libri">
+        </div>
+    </div>
+</section>
+
+<!-- Catalog Section -->
+<section class="catalog">
+    <div class="section-title">
+        <h2>Il Nostro Catalogo</h2>
+        <p>Scopri la nostra ricca collezione di opere</p>
+    </div>
+    <div class="catalog-cards">
+        <div class="catalog-card">
+            <div class="catalog-icon"><i class="fas fa-book"></i></div>
+            <h3>Libri</h3>
+            <p>Esplora migliaia di titoli tra classici, bestseller e nuove uscite in continuo aggiornamento.</p>
+            <a href="/books" class="catalog-btn catalog-btn-primary">Sfoglia Libri</a>
+        </div>
+        <div class="catalog-card">
+            <div class="catalog-icon"><i class="fas fa-user-edit"></i></div>
+            <h3>Autori</h3>
+            <p>Scopri biografie, opere complete e curiosit&agrave; sui tuoi autori preferiti e su nuovi talenti.</p>
+            <a href="/authors" class="catalog-btn catalog-btn-primary">Scopri Autori</a>
+        </div>
+        <!--
+        <div class="catalog-card">
+            <div class="catalog-icon"><i class="fas fa-tags"></i></div>
+            <h3>Generi</h3>
+            <p>Naviga tra i generi letterari e trova i libri che pi&ugrave; si adattano ai tuoi gusti di lettura.</p>
+            <a href="/genres" class="catalog-btn catalog-btn-primary">Esplora Generi</a>
+        </div>
+        -->
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="cta-content">
+        <h2>Inizia la tua avventura letteraria</h2>
+        <p>Unisciti a migliaia di lettori appassionati e scopri un mondo di storie senza fine.</p>
+        <div class="cta-buttons">
+            <a href="/register" class="btn btn-primary">Registrati Gratis</a>
+            <a href="/login" class="btn btn-secondary">Accedi al tuo account</a>
+        </div>
+    </div>
+</section>
+
+<!-- Admin FAB -->
+<div class="admin-fab" id="adminFab" sec:authorize="hasAuthority('ADMIN')">
+    <button class="admin-main-btn">
+        <i class="fas fa-plus"></i>
+    </button>
+    <div class="admin-actions">
+        <a href="/admin/book/add" class="admin-action"><i class="fas fa-book"></i> Aggiungi Libro</a>
+        <a href="/admin/author/add" class="admin-action"><i class="fas fa-user-edit"></i> Aggiungi Autore</a>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/myindex.js"></script>
 </body>
 </html>
